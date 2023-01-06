@@ -3,9 +3,11 @@
   "manifest_version": 2,
   "name": "RoyalRoad Full Story",
   "version": "1.0",
-  "homepage_url": "",
+  "homepage_url": "https://github.com/QuintBrit/RoyalRoad-Addon",
   "icons": {
-    "48": "icons/border-48.png"
+    "16": "icons/favicon-16x16.png",
+    "32": "icons/favicon-32x32.png",
+    "192": "icons/android-chrome-192x192.png",
   },
   "content_scripts": [
     {
