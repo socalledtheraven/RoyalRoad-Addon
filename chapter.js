@@ -15,15 +15,17 @@ function cleanHTML(html) {
 }
 
 function fixButtons() {
-    var buttons = document.querySelector(".margin-bottom-10");
-    var buttons2 = document.querySelector(".nav-buttons")
-    var b = buttons.children[1];
-    b.removeAttribute("href");
-    b.addEventListener("click", function() {
+    // grabs the buttons from the bottom of the page and turns the middle one into a "Full Text" button
+    console.log("fixing buttons");
+    var newButton = document.createElement("div");
+    newButton.setAttribute("class", "col-md-4 col-lg-3 col-lg-offset-2 col-md-offset-4");
+    newButton.textContent = "Full Text";
+    newButton.appendChild(document.createElement("a").setAttribute("class", "btn btn-primary col-xs-12"));
+    newButton.addEventListener("click", function() {
         insertNewChapter();
     });
-    b.textContent = "Full Text";
-    buttons2.replaceWith(buttons);
+    var b = document.querySelector(".col-lg-offset-6");
+    b.insertAdjacentHTML("beforebegin", newButton.outerHTML);
 }
 
 async function insertNewChapter() {
