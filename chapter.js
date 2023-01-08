@@ -1,10 +1,3 @@
-async function getChapterHTML(link) {
-    console.log("getting chapter");
-    const response = await fetch(link);
-
-    return await response.text();
-}
-
 function cleanHTML(html) {
     var parser = new DOMParser();
     console.log("got chapter, parsing");
@@ -17,37 +10,32 @@ function cleanHTML(html) {
     var nextLink = "https://www.royalroad.com" + next.children[1].children[0].getAttribute("href");
     // combine the notes and the chapter text
     var chapter = note1[0].outerHTML + note1[1].outerHTML + chapterText.outerHTML + note2[0].outerHTML + note2[1].outerHTML;
-    console.log("parsed chapter");
+    console.log("parsed chapter: " + typeof(chapter) + " " + chapter);
     return [chapter, nextLink];
 }
 
-function getChapter(link) {
-    getChapterHTML(link).then(html => {
-        var contents = cleanHTML(html);
-        console.log("returning chapter")
-        return contents;
-    });
-}
-
-function fix_buttons() {
+function fixButtons() {
     var buttons = document.querySelector(".margin-bottom-10");
     var buttons2 = document.querySelector(".nav-buttons")
     var b = buttons.children[1];
     b.removeAttribute("href");
-    b.setAttribute("onclick", "getChapter()");
+    b.addEventListener("click", function() {
+        insertNewChapter();
+    });
     b.textContent = "Full Text";
     buttons2.replaceWith(buttons);
 }
 
-function insertNewChapter() {
+async function insertNewChapter() {
     const link = "https://www.royalroad.com/fiction/59918/the-bridge-to-forever-progressionlitrpg/chapter/1073612/chapter-29-the-station";
 
     var body = document.querySelector(".portlet-body");
     var hr = body.querySelectorAll("hr");
-    console.log("test");
 
-    var contents = getChapter(link);
-    console.log("async finished?");
+    console.log("getting chapter");
+    const response = await fetch(link);
+    var html = await response.text();
+    var contents = cleanHTML(html);
     var chapter = contents[0];
     var nextLink = contents[1];
 
@@ -55,4 +43,5 @@ function insertNewChapter() {
     hr[hr.length - 3].insertAdjacentHTML("afterend", chapter);
 }
 
-insertNewChapter();
+console.log("loaded chapter.js");
+fixButtons();
