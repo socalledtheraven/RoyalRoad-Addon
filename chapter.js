@@ -56,8 +56,10 @@ async function insertNewChapter() {
 	var body = document.querySelector(".portlet-body");
 	var hr = body.querySelectorAll("hr");
 	var buttons = document.querySelector(".nav-buttons");
+	var title = document.querySelectorAll(".font-white");
+	title = title[title.length - 1].textContent;
 	buttons.remove();
-	hr[0].remove();
+	hr[0].insertAdjacentHTML("beforebegin", `<h2 class="font-black">${title}</h2>`)
 
 	console.log("getting chapter");
 	const response = await fetch(link);
