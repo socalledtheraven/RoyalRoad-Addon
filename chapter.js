@@ -9,7 +9,12 @@ function cleanHTML(html) {
 	var chapterText = doc.querySelector(".chapter-content");
 	var note2 = doc.querySelectorAll(".author-note-portlet")[1];
 	var next = doc.querySelector(".nav-buttons");
-	var nextLink = "https://www.royalroad.com" + next.children[1].children[0].getAttribute("href");
+	try {
+		var nextLink = "https://www.royalroad.com" + next.children[1].children[0].getAttribute("href");
+	} catch (e) {
+		console.log("no next chapter");
+		var nextLink = null;
+	}
 	// combine the notes and the chapter text
 	var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML + note2.outerHTML;
 	console.log("parsed chapter: " + chapter);
@@ -44,15 +49,24 @@ function fixButtons() {
 	b1.insertAdjacentHTML("beforebegin", newButton.outerHTML);
 }
 
+async function insertAllChapters() {
+	// get first chapter link
+	const url = 
+	// loop through until i hit a 404
+	while (nextLink != null) {
+		nextLink = await insertNewChapter(nextLink);
+	}
+}
+
 console.log("loaded chapter.js");
 fixButtons();
 
 console.log("attaching func");
-document.getElementById("runFunction").addEventListener("click", insertNewChapter, false);
+document.getElementById("runFunction").addEventListener("click", function() {
+	insertAllChapters();
+}, false);
 
-async function insertNewChapter() {
-	const link = "https://www.royalroad.com/fiction/59918/the-bridge-to-forever-progressionlitrpg/chapter/1073612/chapter-29-the-station";
-
+async function insertNewChapter(link) {
 	var body = document.querySelector(".portlet-body");
 	var hr = body.querySelectorAll("hr");
 	var buttons = document.querySelector(".nav-buttons");
@@ -70,4 +84,5 @@ async function insertNewChapter() {
 
 	// console.log(chapter);
 	hr[hr.length - 3].insertAdjacentHTML("afterend", chapter);
+	return nextLink;
 }
