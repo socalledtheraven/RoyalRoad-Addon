@@ -3,14 +3,16 @@ function cleanHTML(html) {
 	console.log("got chapter, parsing");
 	var doc = parser.parseFromString(html, "text/html");
 	// select all elements between the <hr> tags
-	var note1 = doc.querySelectorAll(".author-note-portlet");
+	var titles = doc.querySelectorAll(".font-white");
+	var title = titles[titles.length-1].textContent;
+	var note1 = doc.querySelectorAll(".author-note-portlet")[0];
 	var chapterText = doc.querySelector(".chapter-content");
-	var note2 = doc.querySelectorAll(".author-note-portlet");
+	var note2 = doc.querySelectorAll(".author-note-portlet")[1];
 	var next = doc.querySelector(".nav-buttons");
 	var nextLink = "https://www.royalroad.com" + next.children[1].children[0].getAttribute("href");
 	// combine the notes and the chapter text
-	var chapter = note1[0].outerHTML + note1[1].outerHTML + chapterText.outerHTML + note2[0].outerHTML + note2[1].outerHTML;
-	console.log("parsed chapter: " + typeof (chapter) + " " + chapter);
+	var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML + note2.outerHTML;
+	console.log("parsed chapter: " + chapter);
 	return [chapter, nextLink];
 }
 
@@ -20,23 +22,23 @@ function fixButtons() {
 	var newButton = document.createElement("div");
 	newButton.setAttribute("class", "col-xs-4 col-md-4 col-lg-3 col-lg-offset-2");
 
-    var subButton = document.createElement("a");
-    subButton.setAttribute("class", "btn btn-primary col-xs-12");
-    subButton.textContent = "Full Text";
+	var subButton = document.createElement("a");
+	subButton.setAttribute("class", "btn btn-primary col-xs-12");
+	subButton.textContent = "Full Text";
 	console.log("button add");
 	subButton.setAttribute("id", "runFunction");
-    newButton.append(subButton);
+	newButton.append(subButton);
 
-    // changes rr's weird button layout to one that's mostly symmetrical
+	// changes rr's weird button layout to one that's mostly symmetrical
 	var b1 = document.querySelector(".col-lg-offset-6");
 	b1.classList.remove("col-lg-offset-6");
-    b1.classList.remove("col-md-offset-4");
-    b1.classList.remove("col-xs-6");
+	b1.classList.remove("col-md-offset-4");
+	b1.classList.remove("col-xs-6");
 	b1.setAttribute("class", b1.className + " col-lg-offset-1");
 	b1.setAttribute("class", b1.className + " col-xs-4");
 
-    var b2 = document.querySelector(".col-xl-2");
-    b2.classList.remove("col-xs-6");
+	var b2 = document.querySelector(".col-xl-2");
+	b2.classList.remove("col-xs-6");
 	b2.setAttribute("class", b2.className + " col-xs-4");
 
 	b1.insertAdjacentHTML("beforebegin", newButton.outerHTML);
@@ -45,6 +47,7 @@ function fixButtons() {
 console.log("loaded chapter.js");
 fixButtons();
 
+console.log("attaching func");
 document.getElementById("runFunction").addEventListener("click", insertNewChapter, false);
 
 async function insertNewChapter() {
@@ -52,6 +55,9 @@ async function insertNewChapter() {
 
 	var body = document.querySelector(".portlet-body");
 	var hr = body.querySelectorAll("hr");
+	var buttons = document.querySelector(".nav-buttons");
+	buttons.remove();
+	hr[0].remove();
 
 	console.log("getting chapter");
 	const response = await fetch(link);
@@ -60,6 +66,6 @@ async function insertNewChapter() {
 	var chapter = contents[0];
 	var nextLink = contents[1];
 
-	console.log("dsa");
+	// console.log(chapter);
 	hr[hr.length - 3].insertAdjacentHTML("afterend", chapter);
 }
