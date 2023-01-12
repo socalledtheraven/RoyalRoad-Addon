@@ -51,10 +51,13 @@ function fixButtons() {
 
 async function insertAllChapters() {
 	// get first chapter link
-	const url = 
+	const url = browser.tabs.getCurrent().url;
+	url.then(function() {
+		console.log(url);
+	})
 	// loop through until i hit a 404
 	while (nextLink != null) {
-		nextLink = await insertNewChapter(nextLink);
+		// nextLink = await insertNewChapter(nextLink);
 	}
 }
 
