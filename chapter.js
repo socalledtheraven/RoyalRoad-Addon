@@ -1,4 +1,4 @@
-function cleanHTML(html) {
+function cleanHTML(html, i) {
 	var parser = new DOMParser();
 	console.log("got chapter, parsing");
 	var doc = parser.parseFromString(html, "text/html");
@@ -21,14 +21,29 @@ function cleanHTML(html) {
 		var nextLink = null;
 	}
 	// combine the notes and the chapter text
-	if (note1 != null && note2 != null) {
-		var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML + note2.outerHTML;
-	} else if (note1 != null) {
-		var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML;
-	} else if (note2 != null) {
-		var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + chapterText.outerHTML;
+	if (i != 1) {
+		if (note1 != null && note2 != null) {
+			var chapter = "<hr>" + `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML + note2.outerHTML;
+		} else if (note1 != null) {
+			var chapter = "<hr>" + `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML;
+		} else if (note2 != null) {
+			var chapter = "<hr>" + `<h2 class="font-black">${title}</h2>` + "<hr>" + chapterText.outerHTML + note2.outerHTML;
+		} else {
+			var chapter = "<hr>" + `<h2 class="font-black">${title}</h2>` + "<hr>" + chapterText.outerHTML;
+		}
+	} else {
+		if (note1 != null && note2 != null) {
+			var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML + note2.outerHTML;
+		} else if (note1 != null) {
+			var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML;
+		} else if (note2 != null) {
+			var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + chapterText.outerHTML + note2.outerHTML;
+		} else {
+			var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + chapterText.outerHTML;
+		}
 	}
-	console.log("parsed chapter");
+	// IMPORTANT: being inserted inside the 'chapter-content', fix
+	console.log("parsed chapter:" + chapter);
 	return [chapter, nextLink];
 }
 
@@ -71,24 +86,19 @@ document.getElementById("runFunction").addEventListener("click", function() {
 async function insertAllChapters() {
 	// get first chapter link
 	// grabs from the 'fiction page' button
-	var body = document.querySelector(".portlet-body");
-	var hr = body.querySelectorAll("hr");
 	var buttons = document.querySelector(".nav-buttons");
 	var buttons2 = document.querySelector(".margin-left-0");
 	var chap = document.querySelector(".portlet-body");
-	var notes = Array.from(chap.querySelectorAll(".author-note-portlet"));
-	var currentChapter = [notes, chap.querySelector("h6"), chap.querySelector(".text-center")].flat();
-	for (const el in currentChapter) {
-		if (Object.hasOwnProperty.call(currentChapter, el)) {
-			currentChapter[el].remove();
+	var kids = chap.children;
+	console.log(kids);
+	console.log(kids[0]);
+	for (const el in kids) {
+		if (Object.hasOwnProperty.call(kids, el)) {
+			kids[el].remove();
 		}
 	}	
 	buttons.remove();
 	buttons2.remove();
-	var title = document.querySelectorAll(".font-white");
-	title = title[title.length - 1].textContent;
-	console.log(title);
-	hr[0].insertAdjacentHTML("beforebegin", `<h2 class="font-black">${title}</h2>`)
 
 	console.log(1);
 	const storyUrl = "https://www.royalroad.com" + document.querySelector(".margin-bottom-5").getAttribute("href");
@@ -106,24 +116,24 @@ async function insertAllChapters() {
 	while (nextLink != null && counter < 4) {
 		counter++;
 		console.log("next link: " + nextLink);
-		nextLink = await insertNewChapter(nextLink);
+		nextLink = await insertNewChapter(nextLink, counter);
 	}
 }
 
-async function insertNewChapter(link) {
+async function insertNewChapter(link, i) {
 	var body = document.querySelector(".portlet-body");
 	var hr = body.querySelectorAll("hr");
 
 	console.log("getting chapter");
 	const response = await fetch(link);
 	var html = await response.text();
-	var contents = cleanHTML(html);
+	var contents = cleanHTML(html, i);
 	var chapter = contents[0];
 	var nextLink = contents[1];
 
 	// console.log(chapter);
 	var lastHr = hr[hr.length - 1];
-	lastHr.insertAdjacentHTML("afterend", chapter);
+	lastHr.insertAdjacentHTML("beforebegin", chapter);
 	console.log("finished inserting chapter");
 	return nextLink;
 }
