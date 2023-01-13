@@ -113,7 +113,7 @@ async function insertAllChapters() {
 
 	// loop through until i hit a 404
 	var counter = 0;
-	while (nextLink != null && counter < 4) {
+	while (nextLink != null) {
 		counter++;
 		console.log("next link: " + nextLink);
 		nextLink = await insertNewChapter(nextLink, counter);
@@ -137,3 +137,5 @@ async function insertNewChapter(link, i) {
 	console.log("finished inserting chapter");
 	return nextLink;
 }
+
+// ! TODO: clean up the end and refactor and document
