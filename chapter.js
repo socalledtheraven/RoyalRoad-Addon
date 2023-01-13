@@ -49,18 +49,6 @@ function fixButtons() {
 	b1.insertAdjacentHTML("beforebegin", newButton.outerHTML);
 }
 
-async function insertAllChapters() {
-	// get first chapter link
-	const url = browser.tabs.getCurrent().url;
-	url.then(function() {
-		console.log(url);
-	})
-	// loop through until i hit a 404
-	while (nextLink != null) {
-		// nextLink = await insertNewChapter(nextLink);
-	}
-}
-
 console.log("loaded chapter.js");
 fixButtons();
 
@@ -69,12 +57,31 @@ document.getElementById("runFunction").addEventListener("click", function() {
 	insertAllChapters();
 }, false);
 
+async function insertAllChapters() {
+	// get first chapter link
+	// grabs from the 'fiction page' button
+	const storyUrl = document.querySelector(".margin-bottom-5").getAttribute("href");
+	const page = await fetch(storyUrl);
+	var html = await response.text();
+	var parser = new DOMParser();
+	console.log("got homepage");
+	var doc = parser.parseFromString(html, "text/html");
+	var firstChapterLink = doc.querySelector(".btn-lg").getAttribute("href");
+	var nextLink = firstChapterLink;
+	
+	// loop through until i hit a 404
+	while (nextLink != null) {
+		nextLink = await insertNewChapter(nextLink);
+	}
+}
+
 async function insertNewChapter(link) {
 	var body = document.querySelector(".portlet-body");
 	var hr = body.querySelectorAll("hr");
 	var buttons = document.querySelector(".nav-buttons");
 	var title = document.querySelectorAll(".font-white");
 	title = title[title.length - 1].textContent;
+	console.log(title);
 	buttons.remove();
 	hr[0].insertAdjacentHTML("beforebegin", `<h2 class="font-black">${title}</h2>`)
 
