@@ -6,7 +6,7 @@
 
 This extension just includes:
 
-* a content script, "chaptter.js", that is injected into any royalroad stories to add a Full Text button.
+* a content script, "chapter.js", that is injected into any royalroad stories to add a Full Text button.
 
 ## How to run
 
