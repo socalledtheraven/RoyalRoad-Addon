@@ -5,7 +5,7 @@ function cleanHTML(html, i) {
 
 	var titles = doc.querySelectorAll(".font-white");
 	var title = titles[titles.length - 1].textContent;
-	console.log("title of next chapter:" + title);
+	console.log("title of next chapter: " + title);
 	var note1 = doc.querySelectorAll(".author-note-portlet")[0];
 	var chapterText = doc.querySelector(".chapter-content");
 	var note2 = doc.querySelectorAll(".author-note-portlet")[1];
