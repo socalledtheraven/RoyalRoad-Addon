@@ -52,7 +52,7 @@ function cleanHTML(html, i) {
 	console.log("parsed chapter");
 	// turns the html into elements
 	var temp = document.createElement("div");
-	temp.innerHTML = chapter;
+	temp.innerHTML = DOMPurify.sanitize(chapter);
 	chapterContents = temp.children;
 	return [chapterContents, nextLink];
 }
