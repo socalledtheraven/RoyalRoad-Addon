@@ -49,6 +49,7 @@ function cleanHTML(html, i) {
 		}
 	}
 	console.log("parsed chapter");
+	chapter = parser.parseFromString(chapter, "text/html");
 	return [chapter, nextLink];
 }
 
@@ -151,7 +152,7 @@ async function insertNewChapter(link, i) {
 
 	// inserts the chapter
 	var lastHr = hr[hr.length - 1];
-	lastHr.insertAdjacentHTML("beforebegin", chapter);
+	lastHr.insertAdjacentElement("beforebegin", chapter);
 	console.log("finished inserting chapter");
 	return nextLink;
 }
