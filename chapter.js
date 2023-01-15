@@ -48,9 +48,13 @@ function cleanHTML(html, i) {
 			var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + chapterText.outerHTML;
 		}
 	}
+
 	console.log("parsed chapter");
-	chapter = parser.parseFromString(chapter, "text/html");
-	return [chapter, nextLink];
+	// turns the html into elements
+	var temp = document.createElement("div");
+	temp.innerHTML = chapter;
+	chapterContents = temp.children;
+	return [chapterContents, nextLink];
 }
 
 function fixButtons() {
@@ -87,7 +91,6 @@ function fixButtons() {
 }
 
 function removeInitialElements() {
-	var mobile = false;
 	// removes all the original elements from the page
 	try {
 		var rewindContainer = document.querySelector("#rewind-container");
@@ -97,19 +100,33 @@ function removeInitialElements() {
 	}
 	var bod = document.querySelector(".portlet-body");
 	var buttons = bod.querySelector(".nav-buttons");
-	var buttons2 = bod.querySelector(".margin-left-0");
+	var buttons2 = bod.querySelectorAll(".margin-left-0")[1];
+	console.log(buttons2);
 	var chap = bod.querySelector(".chapter-content");
 	var ad = bod.querySelector("h6.text-center");
 	var adz = bod.querySelectorAll(".wide");
 	var notes = bod.querySelectorAll(".author-note-portlet");
 	try {
 		var supportNote = bod.querySelector("#donate");
-		var support = bod.querySelector("h5.margin-bottom-20");
-		var supportBar = bod.querySelectorAll(".row")[1];
+		supportNote.remove();
 	} catch (e) {
 		console.log("mobile");
-		mobile = true;
 	}
+	
+	try {
+		var support = bod.querySelector("h5.margin-bottom-20");
+		support.remove();
+	} catch (e) {
+		console.log("mobile");
+	}
+
+	try {
+		var supportBar = bod.querySelectorAll(".row")[1];
+		supportBar.remove();
+	} catch (e) {
+		console.log("mobile");
+	}
+
 	var hrs = bod.querySelectorAll("hr");
 	var title = document.querySelector("h1.font-white");
 
@@ -124,11 +141,6 @@ function removeInitialElements() {
 	notes.forEach(function(e) {
 		e.remove();
 	});
-	if (mobile) {
-		supportNote.remove();
-		support.remove();
-		supportBar.remove();
-	}
 	// remove all the hr tags except the last one
 	for (var i = 0; i < hrs.length - 1; i++) {
 		hrs[i].remove();
@@ -147,12 +159,17 @@ async function insertNewChapter(link, i) {
 	const response = await fetch(link);
 	var html = await response.text();
 	var contents = cleanHTML(html, i);
-	var chapter = contents[0];
+	var chapterContents = contents[0];
 	var nextLink = contents[1];
 
-	// inserts the chapter
+	// inserts the chapter (you have to do some bs to avoid the removal from the array)
 	var lastHr = hr[hr.length - 1];
-	lastHr.insertAdjacentElement("beforebegin", chapter);
+	var l = chapterContents.length;
+	for (var i = 0; i < l; i++) {
+		var elem = chapterContents[0];
+		lastHr.insertAdjacentElement("beforebegin", elem);
+	}
+
 	console.log("finished inserting chapter");
 	return nextLink;
 }
