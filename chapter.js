@@ -58,6 +58,9 @@ function fixButtons() {
 	
 	var buttonGroup = document.querySelector(".nav-buttons");
 	var buttons = buttonGroup.querySelectorAll("div");
+	buttonGroup.classList.add("margin-bottom-10");
+	buttonGroup.classList.add("margin-left-0");
+	buttonGroup.classList.add("margin-right-0");
 
 	// fixes both default buttons
 	for (var i = 0; i < buttons.length; i++) {
@@ -83,7 +86,14 @@ function fixButtons() {
 }
 
 function removeInitialElements() {
+	var mobile = false;
 	// removes all the original elements from the page
+	try {
+		var rewindContainer = document.querySelector("#rewind-container");
+		rewindContainer.remove();
+	} catch (e) {
+		console.log("not signed in");
+	}
 	var bod = document.querySelector(".portlet-body");
 	var buttons = bod.querySelector(".nav-buttons");
 	var buttons2 = bod.querySelector(".margin-left-0");
@@ -91,9 +101,14 @@ function removeInitialElements() {
 	var ad = bod.querySelector("h6.text-center");
 	var adz = bod.querySelectorAll(".wide");
 	var notes = bod.querySelectorAll(".author-note-portlet");
-	var supportNote = bod.querySelector("#donate");
-	var support = bod.querySelector("h5.margin-bottom-20");
-	var supportBar = bod.querySelectorAll(".row")[1];
+	try {
+		var supportNote = bod.querySelector("#donate");
+		var support = bod.querySelector("h5.margin-bottom-20");
+		var supportBar = bod.querySelectorAll(".row")[1];
+	} catch (e) {
+		console.log("mobile");
+		mobile = true;
+	}
 	var hrs = bod.querySelectorAll("hr");
 	var title = document.querySelector("h1.font-white");
 
@@ -108,9 +123,11 @@ function removeInitialElements() {
 	notes.forEach(function(e) {
 		e.remove();
 	});
-	supportNote.remove();
-	support.remove();
-	supportBar.remove();
+	if (mobile) {
+		supportNote.remove();
+		support.remove();
+		supportBar.remove();
+	}
 	// remove all the hr tags except the last one
 	for (var i = 0; i < hrs.length - 1; i++) {
 		hrs[i].remove();
