@@ -76,7 +76,8 @@ function fixButtons() {
 	newButton.setAttribute("id", "runFunction");
 
 	// uses the same formatting as the bottom page buttons
-	var b1 = buttonGroup.querySelector("a");
+	var buttons = buttonGroup.children;
+	var b1 = buttons[0];
 	b1.insertAdjacentElement("afterend", newButton);
 	console.log("button addded");
 }
