@@ -62,36 +62,32 @@ function fixButtons() {
 	console.log("fixing buttons");
 	
 	var buttonGroup = document.querySelector(".nav-buttons");
-	if (buttonGroup.length != 3) {
-		var buttons = buttonGroup.querySelectorAll("div");
-		buttonGroup.classList.add("margin-bottom-10");
-		buttonGroup.classList.add("margin-left-0");
-		buttonGroup.classList.add("margin-right-0");
+	var buttons = buttonGroup.querySelectorAll("div");
+	buttonGroup.classList.add("margin-bottom-10");
+	buttonGroup.classList.add("margin-left-0");
+	buttonGroup.classList.add("margin-right-0");
 
-		// fixes both default buttons
-		for (var i = 0; i < buttons.length; i++) {
-			var b = buttons[i];
-			var link = b.children[0];
-			b.insertAdjacentElement("afterend", link);
-			b.remove();
-			link.classList.remove("col-xs-12");
-			link.setAttribute("class", link.className + " col-xs-4");
-		}
-
-		// add the new button
-		var newButton = document.createElement("a");
-		newButton.setAttribute("class", "btn btn-primary col-xs-4");
-		newButton.innerHTML = 'Full <br class="visible-xs-block">Text';
-		newButton.setAttribute("id", "runFunction");
-
-		// uses the same formatting as the bottom page buttons
-		var buttons = buttonGroup.children;
-		var b1 = buttons[0];
-		b1.insertAdjacentElement("afterend", newButton);
-		console.log("button addded");
-	} else {
-		console.log("buttons already fixed");
+	// fixes both default buttons
+	for (var i = 0; i < buttons.length; i++) {
+		var b = buttons[i];
+		var link = b.children[0];
+		b.insertAdjacentElement("afterend", link);
+		b.remove();
+		link.classList.remove("col-xs-12");
+		link.setAttribute("class", link.className + " col-xs-4");
 	}
+
+	// add the new button
+	var newButton = document.createElement("a");
+	newButton.setAttribute("class", "btn btn-primary col-xs-4");
+	newButton.innerHTML = 'Full <br class="visible-xs-block">Text';
+	newButton.setAttribute("id", "runFunction");
+
+	// uses the same formatting as the bottom page buttons
+	var buttons = buttonGroup.children;
+	var b1 = buttons[0];
+	b1.insertAdjacentElement("afterend", newButton);
+	console.log("button addded");
 }
 
 function removeInitialElements() {
