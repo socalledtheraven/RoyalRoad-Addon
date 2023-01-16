@@ -150,7 +150,7 @@ function removeInitialElements() {
 	console.log("removed initial elements");
 }
 
-async function insertNewChapter(link, i) {
+async function insertNewChapter(link, i, isStartingChapter) {
 	var body = document.querySelector(".portlet-body");
 	var hr = body.querySelectorAll("hr");
 
@@ -165,11 +165,20 @@ async function insertNewChapter(link, i) {
 	// inserts the chapter (you have to do some bs to avoid the removal from the array)
 	var lastHr = hr[hr.length - 1];
 	var l = chapterContents.length;
+	var startChap = null;
+
 	for (var i = 0; i < l; i++) {
 		var elem = chapterContents[0];
+		// scrolls the the right chapter automatically
+		if (isStartingChapter && startChap == null) {
+			var startChap = elem;
+		}
 		lastHr.insertAdjacentElement("beforebegin", elem);
 	}
 
+	if (isStartingChapter) {
+		startChap.scrollIntoView();
+	}
 	console.log("finished inserting chapter");
 	return nextLink;
 }
@@ -205,12 +214,20 @@ async function insertAllChapters() {
 	removeInitialElements();
 
 	var nextLink = await getFirstChapterLink();
+	var startingLink = window.location.href;
 
 	// loop through until i hit a 404
 	var counter = 0;
+	var startingChap = false;
 	while (nextLink != null) {
 		counter++;
-		nextLink = await insertNewChapter(nextLink, counter);
+		console.log(nextLink);
+		if (nextLink == startingLink) {
+			startingChap = true;
+		} else {
+			startingChap = false;
+		}
+		nextLink = await insertNewChapter(nextLink, counter, startingChap);
 	}
 	
 	console.log("end of story");
