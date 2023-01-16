@@ -184,7 +184,7 @@ async function getFirstChapterLink() {
 	var doc = parser.parseFromString(html, "text/html");
 	// grabs from chapter link
 	var chaps = doc.querySelector("#chapters");
-	var firstRow = chaps.children[1].children[0].children[0]
+	var firstRow = chaps.children[1].children[0].children[0];
 	var firstChapterLink = "https://www.royalroad.com" + firstRow.children[0].getAttribute("href");
 	console.log("got first chapter link");
 	return firstChapterLink;
