@@ -12,7 +12,7 @@
   "content_scripts": [
     {
       "matches": ["*://www.royalroad.com/fiction/*"],
-      "js": ["chapter.js", "purify.min.js"]
+      "js": ["chapter.js"]
     }
   ],
   "permissions": [
