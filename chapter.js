@@ -182,8 +182,10 @@ async function getFirstChapterLink() {
 	var parser = new DOMParser();
 	console.log("got homepage");
 	var doc = parser.parseFromString(html, "text/html");
-	// start reading button grab
-	var firstChapterLink = "https://www.royalroad.com" + doc.querySelector(".btn-lg").getAttribute("href");
+	// grabs from chapter link
+	var chaps = doc.querySelector("#chapters");
+	var firstRow = chaps.children[1].children[0].children[0]
+	var firstChapterLink = "https://www.royalroad.com" + firstRow.children[0].getAttribute("href");
 	console.log("got first chapter link");
 	return firstChapterLink;
 }
