@@ -1,4 +1,4 @@
-function cleanHTML(html, i) {
+function cleanHTML(html, i, link) {
 	var parser = new DOMParser();
 	console.log("got chapter, parsing");
 	var doc = parser.parseFromString(html, "text/html");
@@ -28,24 +28,24 @@ function cleanHTML(html, i) {
 	if (i != 1) {
 		// only add the existing notes
 		if (note1 != null && note2 != null) {
-			var chapter = "<hr>" + `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML + note2.outerHTML;
+			var chapter = "<hr>" + `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML + note2.outerHTML;
 		} else if (note1 != null) {
-			var chapter = "<hr>" + `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML;
+			var chapter = "<hr>" + `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML;
 		} else if (note2 != null) {
-			var chapter = "<hr>" + `<h2 class="font-black">${title}</h2>` + "<hr>" + chapterText.outerHTML + note2.outerHTML;
+			var chapter = "<hr>" + `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + chapterText.outerHTML + note2.outerHTML;
 		} else {
-			var chapter = "<hr>" + `<h2 class="font-black">${title}</h2>` + "<hr>" + chapterText.outerHTML;
+			var chapter = "<hr>" + `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + chapterText.outerHTML;
 		}
 	} else {
 		// only add the existing notes
 		if (note1 != null && note2 != null) {
-			var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML + note2.outerHTML;
+			var chapter = `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML + note2.outerHTML;
 		} else if (note1 != null) {
-			var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML;
+			var chapter = `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML;
 		} else if (note2 != null) {
-			var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + chapterText.outerHTML + note2.outerHTML;
+			var chapter = `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + chapterText.outerHTML + note2.outerHTML;
 		} else {
-			var chapter = `<h2 class="font-black">${title}</h2>` + "<hr>" + chapterText.outerHTML;
+			var chapter = `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + chapterText.outerHTML;
 		}
 	}
 
@@ -99,8 +99,8 @@ function prepPage() {
 		console.log("not signed in");
 	}
 
-	var newTitle = document.title.split(" - ")[1];
-	console.log("new title: " + newTitle);
+	var newTitle = document.title.split(" - ");
+	newTitle = newTitle[newTitle.length - 1];
 	document.title = newTitle;
 	var bod = document.querySelector(".portlet-body");
 	var buttons = bod.querySelector(".nav-buttons");
@@ -162,7 +162,7 @@ async function insertNewChapter(link, i, isStartingChapter) {
 	console.log("getting chapter");
 	const response = await fetch(link);
 	var html = await response.text();
-	var contents = cleanHTML(html, i);
+	var contents = cleanHTML(html, i, link);
 	var chapterContents = contents[0];
 	var nextLink = contents[1];
 
