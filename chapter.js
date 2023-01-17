@@ -90,7 +90,7 @@ function fixButtons() {
 	console.log("button addded");
 }
 
-function removeInitialElements() {
+function prepPage() {
 	// removes all the original elements from the page
 	try {
 		var rewindContainer = document.querySelector("#rewind-container");
@@ -98,6 +98,10 @@ function removeInitialElements() {
 	} catch (e) {
 		console.log("not signed in");
 	}
+
+	var newTitle = document.title.split(" - ")[1];
+	console.log("new title: " + newTitle);
+	document.title = newTitle;
 	var bod = document.querySelector(".portlet-body");
 	var buttons = bod.querySelector(".nav-buttons");
 	var buttons2 = bod.querySelectorAll(".margin-left-0")[1];
@@ -202,7 +206,6 @@ async function getFirstChapterLink() {
 console.log("loaded chapter.js");
 fixButtons();
 
-console.log("attaching func");
 document.getElementById("runFunction").addEventListener("click", function() {
 	insertAllChapters();
 }, false);
@@ -211,7 +214,7 @@ console.log("attached func");
 // this function needs to be below for reasons of attaching the event listener
 async function insertAllChapters() {
 	// removes all the normal chapter content
-	removeInitialElements();
+	prepPage();
 
 	var nextLink = await getFirstChapterLink();
 	var startingLink = window.location.href;
