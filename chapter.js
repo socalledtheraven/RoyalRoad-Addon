@@ -11,6 +11,9 @@ function cleanHTML(html, i, link) {
 	var note2 = doc.querySelectorAll(".author-note-portlet")[1];
 	var next = doc.querySelector(".nav-buttons");
 
+	var numComments = doc.querySelectorAll(".caption-subject");
+	numComments = Number(numComments[numComments.length - 1].textContent.trim().split("(")[1].replace(")", ""));
+
 	// get the next chapter link if it exists
 	try {
 		if (next.children[1].children[0].getAttribute("href") != null) {
@@ -54,7 +57,7 @@ function cleanHTML(html, i, link) {
 	var temp = document.createElement("div");
 	temp.innerHTML = chapter;
 	chapterContents = temp.children;
-	return [chapterContents, nextLink];
+	return [chapterContents, nextLink, numComments];
 }
 
 function fixButtons() {
@@ -102,10 +105,10 @@ function prepPage() {
 	var newTitle = document.title.split(" - ");
 	newTitle = newTitle[newTitle.length - 1];
 	document.title = newTitle;
+
 	var bod = document.querySelector(".portlet-body");
 	var buttons = bod.querySelector(".nav-buttons");
 	var buttons2 = bod.querySelectorAll(".margin-left-0")[1];
-	console.log(buttons2);
 	var chap = bod.querySelector(".chapter-content");
 	var ad = bod.querySelector("h6.text-center");
 	var adz = bod.querySelectorAll(".wide");
@@ -154,7 +157,7 @@ function prepPage() {
 	console.log("removed initial elements");
 }
 
-async function insertNewChapter(link, i, isStartingChapter) {
+async function insertNewChapter(link, i, isStartingChapter, numComments) {
 	var body = document.querySelector(".portlet-body");
 	var hr = body.querySelectorAll("hr");
 
@@ -165,6 +168,7 @@ async function insertNewChapter(link, i, isStartingChapter) {
 	var contents = cleanHTML(html, i, link);
 	var chapterContents = contents[0];
 	var nextLink = contents[1];
+	numComments += contents[2];
 
 	// inserts the chapter (you have to do some bs to avoid the removal from the array)
 	var lastHr = hr[hr.length - 1];
@@ -183,8 +187,9 @@ async function insertNewChapter(link, i, isStartingChapter) {
 	if (isStartingChapter) {
 		startChap.scrollIntoView();
 	}
+	
 	console.log("finished inserting chapter");
-	return nextLink;
+	return [nextLink, numComments];
 }
 
 async function getFirstChapterLink() {
@@ -222,16 +227,18 @@ async function insertAllChapters() {
 	// loop through until i hit a 404
 	var counter = 0;
 	var startingChap = false;
+	var numComments = 0;
 	while (nextLink != null) {
 		counter++;
-		console.log(nextLink);
 		if (nextLink == startingLink) {
 			startingChap = true;
 		} else {
 			startingChap = false;
 		}
-		nextLink = await insertNewChapter(nextLink, counter, startingChap);
+		contents = await insertNewChapter(nextLink, counter, startingChap, numComments);
+		nextLink = contents[0];
+		numComments = contents[1];
 	}
-	
+
 	console.log("end of story");
 }
