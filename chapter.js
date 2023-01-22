@@ -2,6 +2,7 @@ function cleanHTML(html, i, link) {
 	var parser = new DOMParser();
 	console.log("got chapter, parsing");
 	var doc = parser.parseFromString(html, "text/html");
+	console.log(html);
 
 	var titles = doc.querySelectorAll(".font-white");
 	var title = titles[titles.length - 1].textContent;
@@ -11,8 +12,11 @@ function cleanHTML(html, i, link) {
 	var note2 = doc.querySelectorAll(".author-note-portlet")[1];
 	var next = doc.querySelector(".nav-buttons");
 
-	var numComments = doc.querySelectorAll(".caption-subject");
-	numComments = Number(numComments[numComments.length - 1].textContent.trim().split("(")[1].replace(")", ""));
+	var commentsContainer = doc.querySelector(".comments-container");
+	var comments = commentsContainer.childNodes;
+
+	var numComments = commentsContainer.querySelector(".caption-subject");
+	numComments = Number(numComments.textContent.trim().split("(")[1].replace(")", ""));
 
 	// get the next chapter link if it exists
 	try {
@@ -57,7 +61,7 @@ function cleanHTML(html, i, link) {
 	var temp = document.createElement("div");
 	temp.innerHTML = chapter;
 	chapterContents = temp.children;
-	return [chapterContents, nextLink, numComments];
+	return [chapterContents, nextLink, numComments, comments];
 }
 
 function fixButtons() {
@@ -113,6 +117,8 @@ function prepPage() {
 	var ad = bod.querySelector("h6.text-center");
 	var adz = bod.querySelectorAll(".wide");
 	var notes = bod.querySelectorAll(".author-note-portlet");
+	var comments = document.querySelector(".comments-container");
+
 	try {
 		var supportNote = bod.querySelector("#donate");
 		supportNote.remove();
@@ -153,6 +159,14 @@ function prepPage() {
 		hrs[i].remove();
 	}
 	title.remove();
+
+	var c = comments.children;
+	for (var i = 0; i < c.length; i++) {
+		if (i != 0) {
+			console.log(c[i]);
+			c[i].remove();
+		}
+	}
 	
 	console.log("removed initial elements");
 }
@@ -163,8 +177,10 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 
 	// gets the actual chapter text
 	console.log("getting chapter");
-	const response = await fetch(link);
+	
+	var response = await fetch(link);
 	var html = await response.text();
+
 	var contents = cleanHTML(html, i, link);
 	var chapterContents = contents[0];
 	var nextLink = contents[1];
@@ -227,7 +243,7 @@ async function insertAllChapters() {
 	// loop through until i hit a 404
 	var counter = 0;
 	var startingChap = false;
-	var numComments = 0;
+	var totalComments = 0;
 	while (nextLink != null) {
 		counter++;
 		if (nextLink == startingLink) {
@@ -235,10 +251,15 @@ async function insertAllChapters() {
 		} else {
 			startingChap = false;
 		}
-		contents = await insertNewChapter(nextLink, counter, startingChap, numComments);
+		contents = await insertNewChapter(nextLink, counter, startingChap, totalComments);
 		nextLink = contents[0];
-		numComments = contents[1];
+		totalComments = contents[1];
 	}
 
+	// change the comment number
+	var commentNum = document.querySelectorAll(".caption-subject");
+	commentNum[commentNum.length - 1].innerHTML = "Comments(" + totalComments + ")";
 	console.log("end of story");
 }
+
+// https://www.royalroad.com/fiction/chapter/1035863/comments/1 USE FOR COMMENTRS
