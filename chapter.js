@@ -2,7 +2,6 @@ function cleanHTML(html, i, link) {
 	var parser = new DOMParser();
 	console.log("got chapter, parsing");
 	var doc = parser.parseFromString(html, "text/html");
-	console.log(html);
 
 	var titles = doc.querySelectorAll(".font-white");
 	var title = titles[titles.length - 1].textContent;
@@ -64,6 +63,18 @@ function cleanHTML(html, i, link) {
 	return [chapterContents, nextLink, numComments, comments];
 }
 
+function processComments(html) {
+	var parser = new DOMParser();
+	console.log("got comments, parsing");
+	var doc = parser.parseFromString(html, "text/html");
+
+	var comments = doc.querySelectorAll(".comment");
+	var commentPages = doc.querySelector(".pagination").childNodes;
+	commentPages = 
+	for (i)
+	var nextLink = 
+}
+
 function fixButtons() {
 	// grabs the buttons from the bottom of the page and turns the middle one into a "Full Text" button
 	console.log("fixing buttons");
@@ -117,7 +128,7 @@ function prepPage() {
 	var ad = bod.querySelector("h6.text-center");
 	var adz = bod.querySelectorAll(".wide");
 	var notes = bod.querySelectorAll(".author-note-portlet");
-	var comments = document.querySelector(".comments-container");
+	var comments = document.querySelector(".comment-container");
 
 	try {
 		var supportNote = bod.querySelector("#donate");
@@ -159,14 +170,7 @@ function prepPage() {
 		hrs[i].remove();
 	}
 	title.remove();
-
-	var c = comments.children;
-	for (var i = 0; i < c.length; i++) {
-		if (i != 0) {
-			console.log(c[i]);
-			c[i].remove();
-		}
-	}
+	comments.remove();
 	
 	console.log("removed initial elements");
 }
@@ -180,6 +184,12 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 	
 	var response = await fetch(link);
 	var html = await response.text();
+
+	var commentsLink = link.split("/");
+	commentsLink = commentsLink[0] + "//" + commentsLink[2] + "/" + commentsLink[3] + "/" + commentsLink[6] + "/" + commentsLink[7] + "/" + "comments/1";
+	response = await fetch(commentsLink);
+	html = await response.text();
+	var comments = processAllComments(html);
 
 	var contents = cleanHTML(html, i, link);
 	var chapterContents = contents[0];
