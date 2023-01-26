@@ -69,9 +69,10 @@ function processComments(html) {
 	var doc = parser.parseFromString(html, "text/html");
 
 	var comments = doc.querySelectorAll(".comment");
-	var commentPages = doc.querySelector(".pagination").childNodes;
-	commentPages = 
-	for (i)
+	var commentPages = doc.querySelector(".pagination").children;
+	commentPages = commentPages[commentPages.length - 1].children[0].getAttribute("href");
+	commentPages = commentPages[commentPages.length - 1];
+	for ()
 	var nextLink = 
 }
 
