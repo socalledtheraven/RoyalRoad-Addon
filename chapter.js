@@ -98,7 +98,7 @@ function fixButtons() {
 	buttons = buttonGroup.children;
 	let b1 = buttons[0];
 	b1.insertAdjacentElement("afterend", newButton);
-	console.log("button addded");
+	console.log("button added");
 }
 
 function prepPage() {
@@ -243,7 +243,7 @@ async function insertAllChapters() {
 	let nextLink = await getFirstChapterLink();
 	let startingLink = window.location.href;
 
-	// loop through until i hit a 404
+	// loop through until I hit a 404
 	let counter = 0;
 	let startingChap = false;
 	let totalComments = 0;
@@ -261,4 +261,4 @@ async function insertAllChapters() {
 	console.log("end of story");
 }
 
-// https://www.royalroad.com/fiction/chapter/1035863/comments/1 USE FOR COMMENTRS
+// https://www.royalroad.com/fiction/chapter/1035863/comments/1 USE FOR COMMENTS
