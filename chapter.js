@@ -9,11 +9,10 @@ function cleanHTML(html, i, link) {
 	let note1 = doc.querySelectorAll(".author-note-portlet")[0];
 	let chapterText = doc.querySelector(".chapter-content");
 	let note2 = doc.querySelectorAll(".author-note-portlet")[1];
+	let poll = doc.querySelector(".portlet .light");
 	let next = doc.querySelector(".nav-buttons");
 
 	let commentsContainer = doc.querySelector(".comments-container");
-	let comments = commentsContainer.childNodes;
-
 	let numComments = commentsContainer.querySelector(".caption-subject");
 	numComments = Number(numComments.textContent.trim().split("(")[1].replace(")", ""));
 
@@ -34,38 +33,56 @@ function cleanHTML(html, i, link) {
 		chapter = "<hr>";
 	}
 
-	if (i !== 1) {
-		// only add the existing notes
-		if (note1 != null && note2 != null) {
-			chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML + note2.outerHTML;
-		} else if (note1 != null) {
-			chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + note1.outerHTML + chapterText.outerHTML;
-		} else if (note2 != null) {
-			chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + chapterText.outerHTML + note2.outerHTML;
-		} else {
-			chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2>` + "<hr>" + chapterText.outerHTML;
-		}
+	// only add the existing notes
+	if (note1 != null && note2 != null && poll != null) {
+		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML + note2.outerHTML + poll.outerHTML;
+	} else if (note1 != null) {
+		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML;
+	} else if (note2 != null) {
+		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + note2.outerHTML;
+	} else if (poll != null) {
+		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + poll.outerHTML;
+	} else {
+		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML;
 	}
 
 	console.log("parsed chapter");
 	// turns the html into elements
 	let temp = document.createElement("div");
 	temp.innerHTML = chapter;
-	let chapterContents = temp.children;
-	return [chapterContents, nextLink, numComments, comments];
+	let chapterContents = Array.from(temp.children);
+	return [chapterContents, nextLink, numComments];
 }
 
-function processComments(html) {
+function getComments(html) {
+	let parser = new DOMParser();
+	let doc = parser.parseFromString(html, "text/html");
+
+	return doc.querySelectorAll(".comment");
+}
+
+async function processComments(html) {
 	let parser = new DOMParser();
 	console.log("got comments, parsing");
 	let doc = parser.parseFromString(html, "text/html");
 
-	let comments = doc.querySelectorAll(".comment");
-	let commentPages = doc.querySelector(".pagination").children;
-	commentPages = commentPages[commentPages.length - 1].children[0].getAttribute("href");
-	commentPages = commentPages[commentPages.length - 1];
-	// for ()
-	// let nextLink =
+	let commentPages = doc.querySelector(".pagination").querySelectorAll("li");
+	commentPages = Array.prototype.slice.call(commentPages, 0, commentPages.length - 2);
+
+	let nextLink;
+	let nextComments;
+	let comments = Array.from(getComments(html));
+	for (const page of commentPages) {
+		nextLink = "https://www.royalroad.com" + page.firstChild.getAttribute("href");
+
+		let response = await fetch(nextLink);
+		let htm = await response.text();
+
+		nextComments = Array.from(getComments(htm));
+		comments = comments.concat(nextComments);
+	}
+
+	return comments;
 }
 
 function fixButtons() {
@@ -121,6 +138,7 @@ function prepPage() {
 	let ad = bod.querySelector("h6.text-center");
 	let adz = bod.querySelectorAll(".wide");
 	let notes = bod.querySelectorAll(".author-note-portlet");
+	let poll = bod.querySelector(".portlet .light");
 	let comments = document.querySelector(".comment-container");
 
 	try {
@@ -163,6 +181,7 @@ function prepPage() {
 		hrs[i].remove();
 	}
 	title.remove();
+	poll.remove();
 	comments.remove();
 
 	console.log("removed initial elements");
@@ -175,19 +194,22 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 	// gets the actual chapter text
 	console.log("getting chapter");
 
-	let response = await fetch(link);
-	let html = await response.text();
-
-	let contents = cleanHTML(html, i, link);
-	let chapterContents = contents[0];
-	let nextLink = contents[1];
-	numComments += contents[2];
+	let response1 = await fetch(link);
+	let html1 = await response1.text();
 
 	let commentsLink = link.split("/");
-	commentsLink = commentsLink[0] + "//" + commentsLink[2] + "/" + commentsLink[3] + "/" + commentsLink[6] + "/" + commentsLink[7] + "/" + "comments/1";
-	response = await fetch(commentsLink);
-	html = await response.text();
-	processComments(html);
+	commentsLink = commentsLink[0] + "//" + commentsLink[2] + "/" + commentsLink[3] + "/" + commentsLink[6] + "/" + commentsLink[7] + "/comments";
+	let response2 = await fetch((commentsLink + "/1"));
+	let html2 = await response2.text();
+	let comments = await processComments(html2);
+
+	let contents = cleanHTML(html1, i, link);
+	// appends the comments to the chapter contents
+
+	let chapterContents = contents[0].concat(comments);
+	console.log(chapterContents);
+	let nextLink = contents[1];
+	numComments += contents[2];
 
 	// inserts the chapter (you have to do some bs to avoid the removal from the array)
 	let lastHr = hr[hr.length - 1];
