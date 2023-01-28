@@ -66,20 +66,24 @@ async function processComments(html) {
 	console.log("got comments, parsing");
 	let doc = parser.parseFromString(html, "text/html");
 
-	let commentPages = doc.querySelector(".pagination").querySelectorAll("li");
-	commentPages = Array.prototype.slice.call(commentPages, 0, commentPages.length - 2);
-
 	let nextLink;
 	let nextComments;
 	let comments = Array.from(getComments(html));
-	for (const page of commentPages) {
-		nextLink = "https://www.royalroad.com" + page.firstChild.getAttribute("href");
+	try {
+		let commentPages = doc.querySelector(".pagination")
+			.querySelectorAll("li");
+		commentPages = Array.prototype.slice.call(commentPages, 0, commentPages.length - 2);
+		for (const page of commentPages) {
+			nextLink = "https://www.royalroad.com" + page.firstChild.getAttribute("href");
 
-		let response = await fetch(nextLink);
-		let htm = await response.text();
+			let response = await fetch(nextLink);
+			let htm = await response.text();
 
-		nextComments = Array.from(getComments(htm));
-		comments = comments.concat(nextComments);
+			nextComments = Array.from(getComments(htm));
+			comments = comments.concat(nextComments);
+		}
+	} catch (e) {
+		console.log("less than 25 comments");
 	}
 
 	return comments;
@@ -138,7 +142,6 @@ function prepPage() {
 	let ad = bod.querySelector("h6.text-center");
 	let adz = bod.querySelectorAll(".wide");
 	let notes = bod.querySelectorAll(".author-note-portlet");
-	let poll = bod.querySelector(".portlet .light");
 	let comments = document.querySelector(".comment-container");
 
 	try {
@@ -162,6 +165,13 @@ function prepPage() {
 		console.log("mobile");
 	}
 
+	try {
+		let poll = bod.querySelector(".portlet .light");
+		poll.remove();
+	} catch (e) {
+		console.log("no poll");
+	}
+
 	let hrs = bod.querySelectorAll("hr");
 	let title = document.querySelector("h1.font-white");
 
@@ -181,7 +191,6 @@ function prepPage() {
 		hrs[i].remove();
 	}
 	title.remove();
-	poll.remove();
 	comments.remove();
 
 	console.log("removed initial elements");
@@ -190,6 +199,7 @@ function prepPage() {
 async function insertNewChapter(link, i, isStartingChapter, numComments) {
 	let body = document.querySelector(".portlet-body");
 	let hr = body.querySelectorAll("hr");
+	let commentBody = document.querySelector(".comments-container");
 
 	// gets the actual chapter text
 	console.log("getting chapter");
@@ -206,7 +216,7 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 	let contents = cleanHTML(html1, i, link);
 	// appends the comments to the chapter contents
 
-	let chapterContents = contents[0].concat(comments);
+	let chapterContents = contents[0];
 	console.log(chapterContents);
 	let nextLink = contents[1];
 	numComments += contents[2];
@@ -217,7 +227,7 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 
 	let startChap;
 	for (let i = 0; i < l; i++) {
-		let elem = chapterContents[0];
+		let elem = chapterContents[i];
 		// scrolls to the right chapter automatically
 		if (isStartingChapter) {
 			startChap = elem;
@@ -230,6 +240,14 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 	}
 
 	console.log("finished inserting chapter");
+
+	let lastCommentHr = commentBody.querySelectorAll("hr");
+	console.log(lastCommentHr);
+	lastCommentHr = lastCommentHr[lastCommentHr.length - 1];
+	for (const elem of comments) {
+		lastCommentHr.insertAdjacentElement("beforebegin", elem);
+	}
+
 	return [nextLink, numComments];
 }
 
@@ -282,5 +300,3 @@ async function insertAllChapters() {
 	commentNum[commentNum.length - 1].innerHTML = "Comments(" + totalComments + ")";
 	console.log("end of story");
 }
-
-// https://www.royalroad.com/fiction/chapter/1035863/comments/1 USE FOR COMMENTS
