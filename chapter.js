@@ -57,8 +57,11 @@ function cleanHTML(html, i, link) {
 function getComments(html) {
 	let parser = new DOMParser();
 	let doc = parser.parseFromString(html, "text/html");
-
-	return doc.querySelectorAll(".comment");
+	let bod = doc.querySelector("body").childNodes
+	// get only the elements with the class "comment"
+	return Array.prototype.slice.call(Array.from(bod).filter((element) => {
+		return element.className === "comment";
+	}));
 }
 
 async function processComments(html) {
@@ -142,7 +145,7 @@ function prepPage() {
 	let ad = bod.querySelector("h6.text-center");
 	let adz = bod.querySelectorAll(".wide");
 	let notes = bod.querySelectorAll(".author-note-portlet");
-	let comments = document.querySelector(".comment-container");
+	let comments = document.querySelector(".comment-container").children;
 
 	try {
 		let supportNote = bod.querySelector("#donate");
@@ -191,7 +194,9 @@ function prepPage() {
 		hrs[i].remove();
 	}
 	title.remove();
-	comments.remove();
+	for (const element of comments) {
+		element.remove();
+	}
 
 	console.log("removed initial elements");
 }
@@ -217,7 +222,6 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 	// appends the comments to the chapter contents
 
 	let chapterContents = contents[0];
-	console.log(chapterContents);
 	let nextLink = contents[1];
 	numComments += contents[2];
 
@@ -241,11 +245,9 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 
 	console.log("finished inserting chapter");
 
-	let lastCommentHr = commentBody.querySelectorAll("hr");
-	console.log(lastCommentHr);
-	lastCommentHr = lastCommentHr[lastCommentHr.length - 1];
+	let commentsContainer = commentBody.querySelector(".comment-container");
 	for (const elem of comments) {
-		lastCommentHr.insertAdjacentElement("beforebegin", elem);
+		commentsContainer.insertAdjacentElement("beforeend", elem);
 	}
 
 	return [nextLink, numComments];
@@ -293,6 +295,7 @@ async function insertAllChapters() {
 		let contents = await insertNewChapter(nextLink, counter, startingChap, totalComments);
 		nextLink = contents[0];
 		totalComments = contents[1];
+		throw "stop";
 	}
 
 	// change the comment number
