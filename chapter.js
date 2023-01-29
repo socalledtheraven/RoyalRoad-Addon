@@ -51,7 +51,7 @@ function cleanHTML(html, i, link) {
 	let temp = document.createElement("div");
 	temp.innerHTML = chapter;
 	let chapterContents = Array.from(temp.children);
-	return [chapterContents, nextLink, numComments];
+	return [chapterContents, nextLink, numComments, title];
 }
 
 function getComments(html) {
@@ -64,7 +64,7 @@ function getComments(html) {
 	}));
 }
 
-async function processComments(html) {
+async function processComments(html, chapTitle) {
 	let parser = new DOMParser();
 	console.log("got comments, parsing");
 	let doc = parser.parseFromString(html, "text/html");
@@ -87,6 +87,11 @@ async function processComments(html) {
 		}
 	} catch (e) {
 		console.log("less than 25 comments");
+	}
+
+	for (const comment of comments) {
+		let currentText = comment.querySelector("small").innerHTML;
+		comment.querySelector("small").innerHTML = chapTitle + " - " + currentText;
 	}
 
 	return comments;
@@ -146,6 +151,7 @@ function prepPage() {
 	let adz = bod.querySelectorAll(".wide");
 	let notes = bod.querySelectorAll(".author-note-portlet");
 	let comments = document.querySelector(".comment-container").children;
+	console.log(comments);
 
 	try {
 		let supportNote = bod.querySelector("#donate");
@@ -189,13 +195,21 @@ function prepPage() {
 	notes.forEach(function(e) {
 		e.remove();
 	});
+
 	// remove all the hr tags except the last one
-	for (let i = 0; i < hrs.length - 1; i++) {
-		hrs[i].remove();
+	// use l as a variable to get around the removal of things while iterating
+	// use 0 instead of i because the first element is the one that is always deleted for some reason
+	let l = hrs.length;
+	for (let i = 0; i < l; i++) {
+		hrs[0].remove();
 	}
 	title.remove();
-	for (const element of comments) {
-		element.remove();
+
+	let c = comments.length;
+	console.log(c);
+	for (let i = 0; i < c; i++) {
+		console.log(comments[0]);
+		comments[0].remove();
 	}
 
 	console.log("removed initial elements");
@@ -212,18 +226,13 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 	let response1 = await fetch(link);
 	let html1 = await response1.text();
 
-	let commentsLink = link.split("/");
-	commentsLink = commentsLink[0] + "//" + commentsLink[2] + "/" + commentsLink[3] + "/" + commentsLink[6] + "/" + commentsLink[7] + "/comments";
-	let response2 = await fetch((commentsLink + "/1"));
-	let html2 = await response2.text();
-	let comments = await processComments(html2);
-
 	let contents = cleanHTML(html1, i, link);
 	// appends the comments to the chapter contents
 
 	let chapterContents = contents[0];
 	let nextLink = contents[1];
 	numComments += contents[2];
+	let title = contents[3];
 
 	// inserts the chapter (you have to do some bs to avoid the removal from the array)
 	let lastHr = hr[hr.length - 1];
@@ -245,10 +254,18 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 
 	console.log("finished inserting chapter");
 
+	let commentsLink = link.split("/");
+	commentsLink = commentsLink[0] + "//" + commentsLink[2] + "/" + commentsLink[3] + "/" + commentsLink[6] + "/" + commentsLink[7] + "/comments";
+	let response2 = await fetch((commentsLink + "/1"));
+	let html2 = await response2.text();
+	let comments = await processComments(html2, title);
+
 	let commentsContainer = commentBody.querySelector(".comment-container");
 	for (const elem of comments) {
 		commentsContainer.insertAdjacentElement("beforeend", elem);
 	}
+
+	console.log("finished inserting comments");
 
 	return [nextLink, numComments];
 }
@@ -295,7 +312,6 @@ async function insertAllChapters() {
 		let contents = await insertNewChapter(nextLink, counter, startingChap, totalComments);
 		nextLink = contents[0];
 		totalComments = contents[1];
-		throw "stop";
 	}
 
 	// change the comment number
