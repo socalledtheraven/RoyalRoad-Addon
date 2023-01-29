@@ -82,11 +82,10 @@ async function processComments(html, chapTitle) {
 			let response = await fetch(nextLink);
 			let htm = await response.text();
 
-			nextComments = Array.from(getComments(htm));
-			comments = comments.concat(nextComments);
+			nextComments = getComments(htm);
 		}
 	} catch (e) {
-		console.log("less than 25 comments");
+		console.log("less than 10 comments");
 	}
 
 	for (const comment of comments) {
@@ -151,7 +150,6 @@ function prepPage() {
 	let adz = bod.querySelectorAll(".wide");
 	let notes = bod.querySelectorAll(".author-note-portlet");
 	let comments = document.querySelector(".comment-container").children;
-	console.log(comments);
 
 	try {
 		let supportNote = bod.querySelector("#donate");
@@ -206,19 +204,16 @@ function prepPage() {
 	title.remove();
 
 	let c = comments.length;
-	console.log(c);
 	for (let i = 0; i < c; i++) {
-		console.log(comments[0]);
 		comments[0].remove();
 	}
 
 	console.log("removed initial elements");
 }
 
-async function insertNewChapter(link, i, isStartingChapter, numComments) {
+async function insertNewChapter(link, i, isStartingChapter) {
 	let body = document.querySelector(".portlet-body");
 	let hr = body.querySelectorAll("hr");
-	let commentBody = document.querySelector(".comments-container");
 
 	// gets the actual chapter text
 	console.log("getting chapter");
@@ -231,7 +226,7 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 
 	let chapterContents = contents[0];
 	let nextLink = contents[1];
-	numComments += contents[2];
+	let numComments = contents[2];
 	let title = contents[3];
 
 	// inserts the chapter (you have to do some bs to avoid the removal from the array)
@@ -260,14 +255,14 @@ async function insertNewChapter(link, i, isStartingChapter, numComments) {
 	let html2 = await response2.text();
 	let comments = await processComments(html2, title);
 
-	let commentsContainer = commentBody.querySelector(".comment-container");
-	for (const elem of comments) {
-		commentsContainer.insertAdjacentElement("beforeend", elem);
-	}
+	// let commentsContainer = commentBody.querySelector(".comment-container");
+	// for (const elem of comments) {
+	// 	commentsContainer.insertAdjacentElement("beforeend", elem);
+	// }
 
-	console.log("finished inserting comments");
+	console.log("finished processing comments");
 
-	return [nextLink, numComments];
+	return [nextLink, numComments, comments];
 }
 
 async function getFirstChapterLink() {
@@ -306,16 +301,21 @@ async function insertAllChapters() {
 	let counter = 0;
 	let startingChap = false;
 	let totalComments = 0;
+	let fullComments = [];
 	while (nextLink != null) {
 		counter++;
 		startingChap = nextLink === startingLink;
-		let contents = await insertNewChapter(nextLink, counter, startingChap, totalComments);
+		let contents = await insertNewChapter(nextLink, counter, startingChap);
 		nextLink = contents[0];
-		totalComments = contents[1];
+		totalComments += contents[1];
+		fullComments = fullComments.concat(contents[2]);
 	}
 
-	// change the comment number
+	// change the comment number - its inconsistent with the length of the array bc subcomments are counted
 	let commentNum = document.querySelectorAll(".caption-subject");
 	commentNum[commentNum.length - 1].innerHTML = "Comments(" + totalComments + ")";
+
 	console.log("end of story");
 }
+
+// get expected pagination behaviour from https://www.royalroad.com/fiction/21220/mother-of-learning/chapter/301778/1-good-morning-brother?comment=7759328#comment-7759328
