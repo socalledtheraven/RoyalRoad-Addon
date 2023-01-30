@@ -91,6 +91,7 @@ async function processComments(html, chapTitle) {
 			let htm = await response.text();
 
 			nextComments = getComments(htm);
+			comments = comments.concat(nextComments);
 		}
 	} catch (e) {
 		console.log("less than 10 comments");
@@ -263,11 +264,6 @@ async function insertNewChapter(link, i, isStartingChapter) {
 	let html2 = await response2.text();
 	let comments = await processComments(html2, title);
 
-	// let commentsContainer = commentBody.querySelector(".comment-container");
-	// for (const elem of comments) {
-	// 	commentsContainer.insertAdjacentElement("beforeend", elem);
-	// }
-
 	console.log("finished processing comments");
 
 	return [nextLink, numComments, comments];
@@ -287,6 +283,92 @@ async function getFirstChapterLink() {
 	let firstChapterLink = "https://www.royalroad.com" + firstRow.children[0].getAttribute("href");
 	console.log("got first chapter link");
 	return firstChapterLink;
+}
+
+function updatePagination(pagination, prevPage, currentPage) {
+	prevPage--;
+	currentPage--;
+
+	pagination.childNodes[prevPage].removeAttribute("class");
+	pagination.childNodes[currentPage].setAttribute("class", "page-active");
+
+	let firstButton = document.createElement("li");
+	firstButton.appendChild(document.createElement("a"));
+	firstButton.children[0].setAttribute("data-page", 1);
+	firstButton.children[0].textContent = "« First";
+
+	let prevButton = document.createElement("li");
+	prevButton.appendChild(document.createElement("a"));
+	prevButton.children[0].setAttribute("data-page", prevPage - 1);
+	prevButton.children[0].textContent = "‹ Previous";
+
+	let nextButton = document.createElement("li");
+	nextButton.appendChild(document.createElement("a"));
+	nextButton.children[0].setAttribute("data-page", prevPage + 1);
+	nextButton.children[0].textContent = "Next ›";
+
+	let lastButton = document.createElement("li");
+	lastButton.appendChild(document.createElement("a"));
+	lastButton.children[0].setAttribute("data-page", pagination.children.length - 1);
+	lastButton.children[0].textContent = "Last »";
+
+	// active pages are 2 pages +- the current page or 5 pages, if in the first couple pages or last couple pages
+	let activePages;
+	if (currentPage === 0) {
+		activePages = [pagination.childNodes[0], pagination.childNodes[1], pagination.childNodes[2], pagination.childNodes[3], pagination.childNodes[4], nextButton, lastButton];
+	} else if (currentPage === 1) {
+		activePages = [firstButton, pagination.childNodes[0], pagination.childNodes[1], pagination.childNodes[2], pagination.childNodes[3], pagination.childNodes[4], nextButton, lastButton];
+	} else if (currentPage === pagination.children.length - 1) {
+		console.log("last page");
+		activePages = [firstButton, prevButton, pagination.childNodes[pagination.children.length - 3], pagination.childNodes[pagination.children.length - 2], pagination.childNodes[pagination.children.length - 1]];
+	} else if (currentPage === pagination.children.length - 2) {
+		console.log("second to last page");
+		activePages = [firstButton, prevButton, pagination.childNodes[pagination.children.length - 4], pagination.childNodes[pagination.children.length - 3], pagination.childNodes[pagination.children.length - 2], pagination.childNodes[pagination.children.length - 1], lastButton];
+	} else {
+		console.log("middle page");
+		activePages = [firstButton, prevButton, pagination.childNodes[currentPage - 2], pagination.childNodes[currentPage - 1], pagination.childNodes[currentPage], pagination.childNodes[currentPage + 1], pagination.childNodes[currentPage + 2], nextButton, lastButton];
+	}
+
+	// remove all of pagination's children
+	let l = pagination.children.length;
+	for (let i = 0; i < l; i++) {
+		pagination.children[0].remove();
+	}
+
+	// add the active pages
+	l = activePages.length;
+	console.log(activePages);
+	console.log(pagination);
+	for (let i = 0; i < l; i++) {
+		console.log(activePages[i]);
+		pagination.insertAdjacentElement("beforeend", activePages[i]);
+	}
+
+	let paginationWrapper1 = document.createElement("div");
+	paginationWrapper1.setAttribute("class", "text-center chapter-nav");
+	let paginationWrapper2 = document.createElement("div");
+	paginationWrapper2.setAttribute("class", "text-center");
+	paginationWrapper2.appendChild(pagination);
+	paginationWrapper1.appendChild(paginationWrapper2);
+
+	return paginationWrapper1;
+}
+function loadCommentsPage(fullComments, prevPage, currentPage, pagination) {
+	// removes the old comments
+	let commentBody = document.querySelector(".comment-container");
+	let l = commentBody.children.length;
+	for (let i = 0; i < l; i++) {
+		commentBody.children[0].remove();
+	}
+
+	let comments = fullComments[currentPage-1];
+	console.log(comments);
+	let c = comments.length;
+	for (let i = 0; i < c; i++) {
+		commentBody.insertAdjacentElement("beforeend", comments[i]);
+	}
+
+	comments[c-1].insertAdjacentElement("afterend", updatePagination(pagination, prevPage, currentPage));
 }
 
 console.log("loaded chapter.js");
@@ -319,20 +401,37 @@ async function insertAllChapters() {
 		fullComments = fullComments.concat(contents[2]);
 	}
 
-	// change the comment number - its inconsistent with the length of the array bc subcomments are counted
+	// change the comment number - it's inconsistent with the length of the array bc subcomments are counted
 	let commentNum = document.querySelectorAll(".caption-subject");
 	commentNum[commentNum.length - 1].innerHTML = "Comments(" + totalComments + ")";
 	fullComments = splitArray(fullComments, 10);
+
 	let pagination = document.createElement("ul");
-	for (var i = 0; i < fullComments.length; i++) {
+	pagination.setAttribute("class", "pagination justify-content-center")
+
+	for (let i = 0; i < fullComments.length; i++) {
 		// create a <li> element
-		var li = document.createElement("li");
+		let li = document.createElement("li");
+		if (i === 0) {
+			li.setAttribute("class", "page-active");
+		}
+
 		// set the text of the <li> element to the value in the array
-		li.textContent = i;
+		let a = document.createElement("a");
+		a.setAttribute("data-page", i+1);
+		a.textContent = i+1;
 		// append the <li> element to the <ul> element
+		li.appendChild(a);
 		pagination.appendChild(li);
 	}
-	commentNum[commentNum.length - 1].insertAdjacentElement("afterend", pagination);
+
+	let lastGroup = fullComments[fullComments.length - 1];
+	let lastComment = lastGroup[lastGroup.length - 1];
+	lastComment.insertAdjacentElement("afterend", pagination);
+
+	let last = fullComments.length;
+	console.log("last: " + last);
+	loadCommentsPage(fullComments, 1, last, pagination);
 
 	console.log("end of story");
 }
