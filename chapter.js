@@ -323,7 +323,16 @@ async function insertAllChapters() {
 	let commentNum = document.querySelectorAll(".caption-subject");
 	commentNum[commentNum.length - 1].innerHTML = "Comments(" + totalComments + ")";
 	fullComments = splitArray(fullComments, 10);
-	console.log(fullComments);
+	let pagination = document.createElement("ul");
+	for (var i = 0; i < fullComments.length; i++) {
+		// create a <li> element
+		var li = document.createElement("li");
+		// set the text of the <li> element to the value in the array
+		li.textContent = i;
+		// append the <li> element to the <ul> element
+		pagination.appendChild(li);
+	}
+	commentNum[commentNum.length - 1].insertAdjacentElement("afterend", pagination);
 
 	console.log("end of story");
 }
