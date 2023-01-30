@@ -54,6 +54,14 @@ function cleanHTML(html, i, link) {
 	return [chapterContents, nextLink, numComments, title];
 }
 
+function splitArray(array, chunkSize) {
+    let result = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+        result.push(array.slice(i, i + chunkSize));
+    }
+    return result;
+}
+
 function getComments(html) {
 	let parser = new DOMParser();
 	let doc = parser.parseFromString(html, "text/html");
@@ -314,6 +322,8 @@ async function insertAllChapters() {
 	// change the comment number - its inconsistent with the length of the array bc subcomments are counted
 	let commentNum = document.querySelectorAll(".caption-subject");
 	commentNum[commentNum.length - 1].innerHTML = "Comments(" + totalComments + ")";
+	fullComments = splitArray(fullComments, 10);
+	console.log(fullComments);
 
 	console.log("end of story");
 }
