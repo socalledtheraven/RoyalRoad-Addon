@@ -285,10 +285,10 @@ async function getFirstChapterLink() {
 	return firstChapterLink;
 }
 
-function updatePagination(pagination, prevPage, currentPage) {
-	prevPage--;
-	currentPage--;
-
+function updatePagination(pagination, prevPage, currentPage, fullComments) {
+    console.log(pagination.childNodes);
+    console.log(prevPage);
+    console.log(currentPage);
 	pagination.childNodes[prevPage].removeAttribute("class");
 	pagination.childNodes[currentPage].setAttribute("class", "page-active");
 
@@ -296,21 +296,50 @@ function updatePagination(pagination, prevPage, currentPage) {
 	firstButton.appendChild(document.createElement("a"));
 	firstButton.children[0].setAttribute("data-page", 1);
 	firstButton.children[0].textContent = "« First";
+    firstButton.children[0].addEventListener("click", function() {
+        let page = this.getAttribute("data-page") - 1;
+        console.log("clicked page " + page);
+        loadCommentsPage(fullComments, currentPage, page, pagination);
+    });
 
 	let prevButton = document.createElement("li");
 	prevButton.appendChild(document.createElement("a"));
 	prevButton.children[0].setAttribute("data-page", prevPage - 1);
 	prevButton.children[0].textContent = "‹ Previous";
+    prevButton.children[0].addEventListener("click", function() {
+        let page = this.getAttribute("data-page") - 1;
+        console.log("clicked page " + page);
+        loadCommentsPage(fullComments, currentPage, page, pagination);
+    });
 
 	let nextButton = document.createElement("li");
 	nextButton.appendChild(document.createElement("a"));
 	nextButton.children[0].setAttribute("data-page", prevPage + 1);
 	nextButton.children[0].textContent = "Next ›";
+    nextButton.children[0].addEventListener("click", function() {
+        let page = this.getAttribute("data-page") - 1;
+        console.log("clicked page " + page);
+        loadCommentsPage(fullComments, currentPage, page, pagination);
+    });
 
 	let lastButton = document.createElement("li");
 	lastButton.appendChild(document.createElement("a"));
 	lastButton.children[0].setAttribute("data-page", pagination.children.length - 1);
 	lastButton.children[0].textContent = "Last »";
+    lastButton.children[0].addEventListener("click", function() {
+        let page = this.getAttribute("data-page") - 1;
+        console.log("clicked page " + page);
+        loadCommentsPage(fullComments, currentPage, page, pagination);
+    });
+
+    // iterate through all the pages and add the event listeners
+    for (const page of pagination.children) {
+        page.children[0].addEventListener("click", function() {
+            let page = this.getAttribute("data-page") - 1;
+            console.log("clicked page " + page);
+            loadCommentsPage(fullComments, currentPage, page, pagination);
+        });
+    }
 
 	// active pages are 2 pages +- the current page or 5 pages, if in the first couple pages or last couple pages
 	let activePages;
@@ -361,14 +390,15 @@ function loadCommentsPage(fullComments, prevPage, currentPage, pagination) {
 		commentBody.children[0].remove();
 	}
 
-	let comments = fullComments[currentPage-1];
+	let comments = fullComments[currentPage];
 	console.log(comments);
 	let c = comments.length;
 	for (let i = 0; i < c; i++) {
 		commentBody.insertAdjacentElement("beforeend", comments[i]);
 	}
-
-	comments[c-1].insertAdjacentElement("afterend", updatePagination(pagination, prevPage, currentPage));
+    console.log(prevPage);
+    console.log(currentPage);
+	comments[c-1].insertAdjacentElement("afterend", updatePagination(pagination, prevPage, currentPage, fullComments));
 }
 
 console.log("loaded chapter.js");
@@ -404,7 +434,7 @@ async function insertAllChapters() {
 	// change the comment number - it's inconsistent with the length of the array bc subcomments are counted
 	let commentNum = document.querySelectorAll(".caption-subject");
 	commentNum[commentNum.length - 1].innerHTML = "Comments(" + totalComments + ")";
-	fullComments = splitArray(fullComments, 10);
+    fullComments = splitArray(fullComments, 10);
 
 	let pagination = document.createElement("ul");
 	pagination.setAttribute("class", "pagination justify-content-center")
@@ -431,7 +461,7 @@ async function insertAllChapters() {
 
 	let last = fullComments.length;
 	console.log("last: " + last);
-	loadCommentsPage(fullComments, 1, last, pagination);
+	loadCommentsPage(fullComments, 0, 0, pagination);
 
 	console.log("end of story");
 }
