@@ -420,6 +420,23 @@ function fullPaginationGen(pagination, fullComments) {
 }
 
 console.log("loaded chapter.js");
+
+window.addEventListener("load", function() {
+	console.log("loaded");
+	if (localStorage.getItem("fullTextLoaded") === "true") {
+		console.log("preloaded");
+		insertAllChapters().then(r => {
+			console.log("scrolling to " + localStorage.getItem("previousScrollY"));
+			window.scrollTo(0, localStorage.getItem("previousScrollY"));
+		});
+	}}
+);
+
+window.addEventListener("beforeunload", function() {
+	console.log("finds scroll position: " + window.scrollY);
+	localStorage.setItem("previousScrollY", window.scrollY);
+});
+
 fixButtons();
 
 document.getElementById("runFunction").addEventListener("click", function() {
@@ -429,6 +446,7 @@ console.log("attached func");
 
 // this function needs to be below for reasons of attaching the event listener
 async function insertAllChapters() {
+	localStorage.setItem("fullTextLoaded", "true");
 	// removes all the normal chapter content
 	prepPage();
 
@@ -454,9 +472,10 @@ async function insertAllChapters() {
 		document.querySelector(".comment-container").appendChild(comment);
 	}
 
-	// // change the comment number - it's inconsistent with the length of the array bc subcomments are counted
-	// let commentNum = document.querySelectorAll(".caption-subject");
-	// commentNum[commentNum.length - 1].innerHTML = "Comments(" + totalComments + ")";
+	// change the comment number - it's inconsistent with the length of the array bc subcomments are counted
+	let commentNum = document.querySelectorAll(".caption-subject");
+	commentNum[commentNum.length - 1].innerHTML = "Comments(" + totalComments + ")";
+
     // fullComments = splitArray(fullComments, 10);
 	// console.log(fullComments);
 	//
