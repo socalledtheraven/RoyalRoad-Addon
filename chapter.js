@@ -6,9 +6,26 @@ function cleanHTML(html, i, link) {
 	let titles = doc.querySelectorAll(".font-white");
 	let title = titles[titles.length - 1].textContent;
 	console.log("title of next chapter: " + title);
-	let note1 = doc.querySelectorAll(".author-note-portlet")[0];
+	let note1;
+	let note2;
+	let note = doc.querySelector(".author-note-portlet");
+	if (doc.querySelectorAll(".author-note-portlet").length > 1) {
+		console.log("more than one note");
+		note1 = doc.querySelectorAll(".author-note-portlet")[0];
+		note2 = doc.querySelectorAll(".author-note-portlet")[1];
+	} else if (doc.querySelectorAll(".author-note-portlet").length === 0) {
+		console.log("no notes");
+	} else {
+		console.log("only one note");
+		if (note.compareDocumentPosition(doc.querySelector(".chapter-content")) & Node.DOCUMENT_POSITION_FOLLOWING) {
+			console.log("note is before chapter text");
+			note1 = note;
+		} else {
+			console.log("note is after chapter text");
+			note2 = note;
+		}
+	}
 	let chapterText = doc.querySelector(".chapter-content");
-	let note2 = doc.querySelectorAll(".author-note-portlet")[1];
 	let poll = doc.querySelector(".portlet .light");
 	let next = doc.querySelector(".nav-buttons");
 
@@ -425,7 +442,7 @@ window.addEventListener("load", function() {
 	console.log("loaded");
 	if (localStorage.getItem("fullTextLoaded") === "true") {
 		console.log("preloaded");
-		insertAllChapters().then(r => {
+		insertAllChapters().then(function() {
 			console.log("scrolling to " + localStorage.getItem("previousScrollY"));
 			window.scrollTo(0, localStorage.getItem("previousScrollY"));
 		});
