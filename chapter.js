@@ -432,6 +432,7 @@ function updatePagination(pagination, prevPage, currentPage, fullComments) {
 
 	return pagination;
 }
+
 function loadCommentsPage(fullComments, prevPage, currentPage, pagination) {
 	// removes the old comments
 	let commentBody = document.querySelector(".comment-container");
@@ -504,9 +505,34 @@ async function insertAllChapters() {
 	// removes all the normal chapter content
 	prepPage();
 
+	// makes the light grey slightly transparent overlay
+	var overlay = document.createElement("div");
+	overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+	overlay.style.position = "fixed";
+	overlay.style.width = "100%";
+	overlay.style.height = "100%";
+	overlay.style.top = 0;
+	overlay.style.left = 0;
+
+	var loadingText = document.createElement("h1");
+	loadingText.style.position = "fixed";
+	loadingText.style.top = "40%"; 
+	loadingText.style.left = "50%";
+	loadingText.style.transform = "translate(-50%, -50%)";
+	loadingText.style.fontSize = "36px";
+	loadingText.style.color = "white";
+	loadingText.style.padding = "20px";
+	loadingText.style.borderRadius = "10px";
+	loadingText.style.textAlign = "center";
+	loadingText.textContent = "Loading...";
+
+	// get the loading animation from the raw js like the load method.
+
+	document.body.appendChild(overlay);
+	document.body.appendChild(loadingText);
+
 	let nextLink = await getFirstChapterLink();
 	let startingLink = window.location.href;
-
 
 	// loop through until I hit a 404
 	let counter = 0;
