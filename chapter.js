@@ -51,12 +51,15 @@ function cleanHTML(html, i, link) {
 		spoilerWrapper1.appendChild(spoilerCopy);
 		
 		let spoilerWrapper2 = document.createElement("div");
-		spoilerWrapper2.setAttribute()
+		spoilerWrapper2.setAttribute("class", "spoiler");
+		spoilerWrapper2.setAttribute("data-class", "spoiler");
+		spoilerWrapper2.setAttribute("data-caption", "Spoiler");
+		spoilerWrapper2.appendChild(spoilerWrapper1);
 
 
-		console.log(spoilerWrapper1);
+		console.log(spoilerWrapper2);
 		
-		parent.replaceChild(spoilerWrapper1, spoiler);
+		parent.replaceChild(spoilerWrapper2, spoiler);
 	}
 
 	let poll = doc.querySelector(".portlet .light");
