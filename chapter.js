@@ -343,16 +343,29 @@ function updatePagination(currentPage, fullComments) {
 
 	fullPagination.childNodes[currentPage].setAttribute("class", "page-active");
 
-	// let firstButton = document.createElement("li");
-	// firstButton.appendChild(document.createElement("a"));
-	// firstButton.children[0].setAttribute("data-page", 1);
-	// firstButton.children[0].textContent = "« First";
-	// firstButton.children[0].addEventListener("click", function () {
-	// 	let page = this.getAttribute("data-page");
-	// 	console.log("clicked page " + page);
-	// 	loadCommentsPage(fullComments, currentPage, page-1, pagination);
-	// });
-	//
+	let firstButton = document.createElement("li");
+	firstButton.appendChild(document.createElement("a"));
+	firstButton.children[0].setAttribute("data-page", 1);
+	firstButton.children[0].textContent = "« First";
+	firstButton.children[0].addEventListener("click", function () {
+		console.log("clicked first page");
+		loadCommentsPage(fullComments, 0);
+	});
+
+	let last = fullPagination.children.length - 1;
+
+	let lastButton = document.createElement("li");
+	lastButton.appendChild(document.createElement("a"));
+	lastButton.children[0].setAttribute("data-page", last);
+	lastButton.children[0].textContent = "Last »";
+	lastButton.children[0].addEventListener("click", function () {
+		console.log("clicked last page, " + last);
+		loadCommentsPage(fullComments, last);
+	});
+
+	fullPagination.prepend(firstButton);
+	fullPagination.appendChild(lastButton);
+
 	// let prevButton = document.createElement("li");
 	// prevButton.appendChild(document.createElement("a"));
 	// prevButton.children[0].setAttribute("data-page", currentPage);
@@ -373,16 +386,7 @@ function updatePagination(currentPage, fullComments) {
 	// 	loadCommentsPage(fullComments, currentPage, page-1, pagination);
 	// });
 	//
-	// let lastButton = document.createElement("li");
-	// lastButton.appendChild(document.createElement("a"));
-	// lastButton.children[0].setAttribute("data-page", fullPagination.length-1);
-	// lastButton.children[0].textContent = "Last »";
-	// lastButton.children[0].addEventListener("click", function () {
-	// 	let page = this.getAttribute("data-page");
-	// 	console.log("clicked page " + page);
-	// 	loadCommentsPage(fullComments, currentPage, page-1, pagination);
-	// });
-	//
+
 	//
     // // iterate through all the pages and add the event listeners
 	// console.log(fullPagination.children);
@@ -439,7 +443,7 @@ function loadCommentsPage(splitComments, currentPage) {
 	}
 	console.log(splitComments);
 
-	console.log(currentPage);
+	console.log("current page is " + currentPage);
 	let comments = splitComments[currentPage];
 	console.log(comments);
 
