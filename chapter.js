@@ -26,6 +26,39 @@ function cleanHTML(html, i, link) {
 		}
 	}
 	let chapterText = doc.querySelector(".chapter-content");
+
+	let spoilers = doc.querySelectorAll(".spoiler-new");
+	console.log(spoilers);
+	for (const spoiler of spoilers) {
+		console.log(spoiler);
+		let parent = spoiler.parentNode;
+
+		let spoilerCopy = document.createElement("div");
+		spoilerCopy.setAttribute("class", "spoiler-inner");
+		spoilerCopy.setAttribute("data-class", "spoiler-inner");
+		spoilerCopy.setAttribute("style", "display: none;");
+		spoilerCopy.innerHTML = spoiler.innerHTML;
+
+		let spoilerDisplay = document.createElement("div");
+		spoilerDisplay.setAttribute("class", "smalltext");
+		spoilerDisplay.setAttribute("style", "margin-bottom: 2px;");
+		spoilerDisplay.innerHTML = '<strong>Spoiler</strong> <input class="spoilerButton btn btn-default btn-xs" type="button" value="Show" data-class="spoilerButton">'
+
+		let spoilerWrapper1 = document.createElement("div");
+		spoilerWrapper1.setAttribute("class", "spoilerContent");
+		spoilerWrapper1.setAttribute("data-class", "spoilerContent");
+		spoilerWrapper1.appendChild(spoilerDisplay);
+		spoilerWrapper1.appendChild(spoilerCopy);
+		
+		let spoilerWrapper2 = document.createElement("div");
+		spoilerWrapper2.setAttribute()
+
+
+		console.log(spoilerWrapper1);
+		
+		parent.replaceChild(spoilerWrapper1, spoiler);
+	}
+
 	let poll = doc.querySelector(".portlet .light");
 	let next = doc.querySelector(".nav-buttons");
 
@@ -438,16 +471,17 @@ function fullPaginationGen(pagination, fullComments) {
 
 console.log("loaded chapter.js");
 
-window.addEventListener("load", function() {
-	console.log("loaded");
-	if (localStorage.getItem("fullTextLoaded") === "true") {
-		console.log("preloaded");
-		insertAllChapters().then(function() {
-			console.log("scrolling to " + localStorage.getItem("previousScrollY"));
-			window.scrollTo(0, localStorage.getItem("previousScrollY"));
-		});
-	}}
-);
+// DISABLED FOR TESTING, REENABLE BEFORE BUILD
+// window.addEventListener("load", function() {
+// 	console.log("loaded");
+// 	if (localStorage.getItem("fullTextLoaded") === "true") {
+// 		console.log("preloaded");
+// 		insertAllChapters().then(function() {
+// 			console.log("scrolling to " + localStorage.getItem("previousScrollY"));
+// 			window.scrollTo(0, localStorage.getItem("previousScrollY"));
+// 		});
+// 	}}
+// );
 
 window.addEventListener("beforeunload", function() {
 	console.log("finds scroll position: " + window.scrollY);
@@ -514,5 +548,3 @@ async function insertAllChapters() {
 
 	console.log("end of story");
 }
-
-// get expected pagination behaviour from https://www.royalroad.com/fiction/21220/mother-of-learning/chapter/301778/1-good-morning-brother?comment=7759328#comment-7759328
