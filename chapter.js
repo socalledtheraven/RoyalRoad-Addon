@@ -28,9 +28,7 @@ function cleanHTML(html, i, link) {
 	let chapterText = doc.querySelector(".chapter-content");
 
 	let spoilers = doc.querySelectorAll(".spoiler-new");
-	console.log(spoilers);
 	for (const spoiler of spoilers) {
-		console.log(spoiler);
 		let parent = spoiler.parentNode;
 
 		let spoilerCopy = document.createElement("div");
@@ -56,9 +54,6 @@ function cleanHTML(html, i, link) {
 		spoilerWrapper2.appendChild(spoilerDisplay);
 		spoilerWrapper2.appendChild(spoilerWrapper1);
 
-
-		console.log(spoilerWrapper2);
-		
 		parent.replaceChild(spoilerWrapper2, spoiler);
 	}
 
@@ -87,7 +82,7 @@ function cleanHTML(html, i, link) {
 	}
 
 	// only add the existing notes
-	if (note1 != null && note2 != null && poll != null) {
+	if ((note1 != null) && (note2 != null) && (poll != null)) {
 		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML + note2.outerHTML + poll.outerHTML;
 	} else if (note1 != null) {
 		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML;
@@ -115,12 +110,16 @@ function splitArray(array, chunkSize) {
     return result;
 }
 
-function getComments(html) {
+function getComments(html, chapTitle) {
 	let parser = new DOMParser();
 	let doc = parser.parseFromString(html, "text/html");
-	let bod = doc.querySelector("body").childNodes
+	let bod = doc.querySelector("body");
+
+	for (const text of bod.querySelectorAll("small")) {
+		text.innerHTML = chapTitle + " - " + text.innerHTML;
+	}
 	// get only the elements with the class "comment"
-	return Array.prototype.slice.call(Array.from(bod).filter((element) => {
+	return Array.prototype.slice.call(Array.from(bod.childNodes).filter((element) => {
 		return element.className === "comment";
 	}));
 }
@@ -132,7 +131,7 @@ async function processComments(html, chapTitle) {
 
 	let nextLink;
 	let nextComments;
-	let comments = Array.from(getComments(html));
+	let comments = Array.from(getComments(html, chapTitle));
 	try {
 		let commentPages = doc.querySelector(".pagination")
 			.querySelectorAll("li");
@@ -148,11 +147,6 @@ async function processComments(html, chapTitle) {
 		}
 	} catch (e) {
 		console.log("less than 10 comments");
-	}
-
-	for (const comment of comments) {
-		let currentText = comment.querySelector("small").innerHTML;
-		comment.querySelector("small").innerHTML = chapTitle + " - " + currentText;
 	}
 
 	return comments;
@@ -338,122 +332,128 @@ async function getFirstChapterLink() {
 	return firstChapterLink;
 }
 
-function updatePagination(pagination, prevPage, currentPage, fullComments) {
-	console.log(pagination);
-	const fullPagination = fullPaginationGen(pagination, fullComments);
+function updatePagination(currentPage, fullComments) {
+	const fullPagination = fullPaginationGen(fullComments);
 	console.log(fullPagination);
-	pagination.childNodes[prevPage].removeAttribute("class");
-	pagination.childNodes[currentPage].setAttribute("class", "page-active");
-
-	let firstButton = document.createElement("li");
-	firstButton.appendChild(document.createElement("a"));
-	firstButton.children[0].setAttribute("data-page", 1);
-	firstButton.children[0].textContent = "« First";
-	firstButton.children[0].addEventListener("click", function () {
-		let page = this.getAttribute("data-page");
-		console.log("clicked page " + page);
-		loadCommentsPage(fullComments, currentPage, page-1, pagination);
-	});
-
-	let prevButton = document.createElement("li");
-	prevButton.appendChild(document.createElement("a"));
-	prevButton.children[0].setAttribute("data-page", currentPage);
-	prevButton.children[0].textContent = "‹ Previous";
-	prevButton.children[0].addEventListener("click", function () {
-		let page = this.getAttribute("data-page");
-		console.log("clicked page " + page);
-		loadCommentsPage(fullComments, currentPage, page-1, pagination);
-	});
-
-	let nextButton = document.createElement("li");
-	nextButton.appendChild(document.createElement("a"));
-	nextButton.children[0].setAttribute("data-page", currentPage+2);
-	nextButton.children[0].textContent = "Next ›";
-	nextButton.children[0].addEventListener("click", function () {
-		let page = this.getAttribute("data-page");
-		console.log("clicked page " + page);
-		loadCommentsPage(fullComments, currentPage, page-1, pagination);
-	});
-
-	let lastButton = document.createElement("li");
-	lastButton.appendChild(document.createElement("a"));
-	lastButton.children[0].setAttribute("data-page", fullPagination.length-1);
-	lastButton.children[0].textContent = "Last »";
-	lastButton.children[0].addEventListener("click", function () {
-		let page = this.getAttribute("data-page");
-		console.log("clicked page " + page);
-		loadCommentsPage(fullComments, currentPage, page-1, pagination);
-	});
-
-
-    // iterate through all the pages and add the event listeners
-	console.log(fullPagination.children);
-    for (const page of fullPagination.children) {
-        page.children[0].addEventListener("click", function() {
-            let page = this.getAttribute("data-page");
-            console.log("clicked page " + page);
-            loadCommentsPage(fullComments, currentPage, page-1, pagination);
-        });
-    }
-
-	// active pages are 2 pages +- the current page or 5 pages, if in the first couple pages or last couple pages
-	let activePages;
-	if (currentPage === 0) {
-		activePages = [fullPagination.childNodes[0], fullPagination.childNodes[1], fullPagination.childNodes[2], fullPagination.childNodes[3], fullPagination.childNodes[4], nextButton, lastButton];
-	} else if (currentPage === 1) {
-		activePages = [firstButton, fullPagination.childNodes[0], fullPagination.childNodes[1], fullPagination.childNodes[2], fullPagination.childNodes[3], fullPagination.childNodes[4], nextButton, lastButton];
-	} else if (currentPage === fullPagination.children.length - 1) {
-		console.log("last page");
-		activePages = [firstButton, prevButton, fullPagination.childNodes[fullPagination.children.length - 3], fullPagination.childNodes[fullPagination.children.length - 2], fullPagination.childNodes[fullPagination.children.length - 1]];
-	} else if (currentPage === fullPagination.children.length - 2) {
-		console.log("second to last page");
-		activePages = [firstButton, prevButton, fullPagination.childNodes[fullPagination.children.length - 4], fullPagination.childNodes[fullPagination.children.length - 3], fullPagination.childNodes[fullPagination.children.length - 2], fullPagination.childNodes[fullPagination.children.length - 1], lastButton];
-	} else {
-		console.log("middle page");
-		console.log(currentPage);
-		activePages = [firstButton, prevButton, fullPagination.childNodes[currentPage - 2], fullPagination.childNodes[currentPage - 1], fullPagination.childNodes[currentPage], fullPagination.childNodes[currentPage + 1], fullPagination.childNodes[currentPage + 2], nextButton, lastButton];
+	for (const page of fullPagination.childNodes) {
+		if (page.hasAttribute("class")) {
+			page.removeAttribute("class");
+		}
 	}
+	fullPagination.childNodes[currentPage].setAttribute("class", "page-active");
 
-	// remove all of pagination's children
-	console.log(pagination);
-	while (pagination.firstChild) {
-		console.log(pagination.children);
-		console.log(pagination.firstChild);
-		pagination.removeChild(pagination.firstChild);
-	}
+	// let firstButton = document.createElement("li");
+	// firstButton.appendChild(document.createElement("a"));
+	// firstButton.children[0].setAttribute("data-page", 1);
+	// firstButton.children[0].textContent = "« First";
+	// firstButton.children[0].addEventListener("click", function () {
+	// 	let page = this.getAttribute("data-page");
+	// 	console.log("clicked page " + page);
+	// 	loadCommentsPage(fullComments, currentPage, page-1, pagination);
+	// });
+	//
+	// let prevButton = document.createElement("li");
+	// prevButton.appendChild(document.createElement("a"));
+	// prevButton.children[0].setAttribute("data-page", currentPage);
+	// prevButton.children[0].textContent = "‹ Previous";
+	// prevButton.children[0].addEventListener("click", function () {
+	// 	let page = this.getAttribute("data-page");
+	// 	console.log("clicked page " + page);
+	// 	loadCommentsPage(fullComments, currentPage, page-1, pagination);
+	// });
+	//
+	// let nextButton = document.createElement("li");
+	// nextButton.appendChild(document.createElement("a"));
+	// nextButton.children[0].setAttribute("data-page", currentPage+2);
+	// nextButton.children[0].textContent = "Next ›";
+	// nextButton.children[0].addEventListener("click", function () {
+	// 	let page = this.getAttribute("data-page");
+	// 	console.log("clicked page " + page);
+	// 	loadCommentsPage(fullComments, currentPage, page-1, pagination);
+	// });
+	//
+	// let lastButton = document.createElement("li");
+	// lastButton.appendChild(document.createElement("a"));
+	// lastButton.children[0].setAttribute("data-page", fullPagination.length-1);
+	// lastButton.children[0].textContent = "Last »";
+	// lastButton.children[0].addEventListener("click", function () {
+	// 	let page = this.getAttribute("data-page");
+	// 	console.log("clicked page " + page);
+	// 	loadCommentsPage(fullComments, currentPage, page-1, pagination);
+	// });
+	//
+	//
+    // // iterate through all the pages and add the event listeners
+	// console.log(fullPagination.children);
+    // for (const page of fullPagination.children) {
+    //     page.children[0].addEventListener("click", function() {
+    //         let page = this.getAttribute("data-page");
+    //         console.log("clicked page " + page);
+    //         loadCommentsPage(fullComments, currentPage, page-1, pagination);
+    //     });
+    // }
+	//
+	// // active pages are 2 pages +- the current page or 5 pages, if in the first couple pages or last couple pages
+	// let activePages;
+	// if (currentPage === 0) {
+	// 	activePages = [fullPagination.childNodes[0], fullPagination.childNodes[1], fullPagination.childNodes[2], fullPagination.childNodes[3], fullPagination.childNodes[4], nextButton, lastButton];
+	// } else if (currentPage === 1) {
+	// 	activePages = [firstButton, fullPagination.childNodes[0], fullPagination.childNodes[1], fullPagination.childNodes[2], fullPagination.childNodes[3], fullPagination.childNodes[4], nextButton, lastButton];
+	// } else if (currentPage === fullPagination.children.length - 1) {
+	// 	console.log("last page");
+	// 	activePages = [firstButton, prevButton, fullPagination.childNodes[fullPagination.children.length - 3], fullPagination.childNodes[fullPagination.children.length - 2], fullPagination.childNodes[fullPagination.children.length - 1]];
+	// } else if (currentPage === fullPagination.children.length - 2) {
+	// 	console.log("second to last page");
+	// 	activePages = [firstButton, prevButton, fullPagination.childNodes[fullPagination.children.length - 4], fullPagination.childNodes[fullPagination.children.length - 3], fullPagination.childNodes[fullPagination.children.length - 2], fullPagination.childNodes[fullPagination.children.length - 1], lastButton];
+	// } else {
+	// 	console.log("middle page");
+	// 	console.log(currentPage);
+	// 	activePages = [firstButton, prevButton, fullPagination.childNodes[currentPage - 2], fullPagination.childNodes[currentPage - 1], fullPagination.childNodes[currentPage], fullPagination.childNodes[currentPage + 1], fullPagination.childNodes[currentPage + 2], nextButton, lastButton];
+	// }
+	//
+	// // remove all of pagination's children
+	// console.log(pagination);
+	// while (pagination.firstChild) {
+	// 	console.log(pagination.children);
+	// 	console.log(pagination.firstChild);
+	// 	pagination.removeChild(pagination.firstChild);
+	// }
+	//
+	// console.log(pagination);
+	// // add the active pages
+	// let l = activePages.length;
+	// console.log(activePages);
+	// for (let i = 0; i < l; i++) {
+	// 	pagination.appendChild(activePages[i]);
+	// }
 
-	console.log(pagination);
-	// add the active pages
-	let l = activePages.length;
-	console.log(activePages);
-	for (let i = 0; i < l; i++) {
-		pagination.appendChild(activePages[i]);
-	}
-
-	return pagination;
+	return fullPagination;
 }
 
-function loadCommentsPage(fullComments, prevPage, currentPage, pagination) {
+function loadCommentsPage(splitComments, currentPage) {
 	// removes the old comments
 	let commentBody = document.querySelector(".comment-container");
 	while (commentBody.firstChild) {
 		commentBody.removeChild(commentBody.firstChild);
 	}
+	console.log(splitComments);
 
-	console.log(fullComments);
 	console.log(currentPage);
-	let comments = fullComments[currentPage];
+	let comments = splitComments[currentPage];
 	console.log(comments);
+	// adds the new comments
 	for (const comment of comments) {
 		commentBody.appendChild(comment);
 	}
 
-    console.log("old page = " + prevPage);
+	// adds the new pagination
     console.log("new page = " + currentPage);
-	comments[comments.length-1].insertAdjacentElement("afterend", updatePagination(pagination, prevPage, currentPage, fullComments));
+	comments[comments.length-1].insertAdjacentElement("afterend", updatePagination(currentPage, splitComments));
 }
 
-function fullPaginationGen(pagination, fullComments) {
+function fullPaginationGen(fullComments) {
+	let pagination = document.createElement("ul");
+	pagination.setAttribute("class", "pagination");
 	for (let i = 0; i < fullComments.length; i++) {
 		// create a <li> element
 		let li = document.createElement("li");
@@ -465,8 +465,13 @@ function fullPaginationGen(pagination, fullComments) {
 		let a = document.createElement("a");
 		a.setAttribute("data-page", i+1);
 		a.textContent = i+1;
+		a.addEventListener("click", function() {
+			console.log("clicked page " + i+1);
+			loadCommentsPage(fullComments, i);
+		});
 		// append the <li> element to the <ul> element
 		li.appendChild(a);
+
 		pagination.appendChild(li);
 	}
 
@@ -474,18 +479,16 @@ function fullPaginationGen(pagination, fullComments) {
 }
 
 console.log("loaded chapter.js");
-
-// DISABLED FOR TESTING, REENABLE BEFORE BUILD
-// window.addEventListener("load", function() {
-// 	console.log("loaded");
-// 	if (localStorage.getItem("fullTextLoaded") === "true") {
-// 		console.log("preloaded");
-// 		insertAllChapters().then(function() {
-// 			console.log("scrolling to " + localStorage.getItem("previousScrollY"));
-// 			window.scrollTo(0, localStorage.getItem("previousScrollY"));
-// 		});
-// 	}}
-// );
+window.addEventListener("load", function() {
+	console.log("loaded");
+	if (localStorage.getItem(window.location.href + "fullTextLoaded") === "true") {
+		console.log("preloaded");
+		insertAllChapters().then(function () {
+			console.log("scrolling to " + localStorage.getItem("previousScrollY"));
+			window.scrollTo(0, localStorage.getItem("previousScrollY"));
+		});
+	}
+});
 
 window.addEventListener("beforeunload", function() {
 	console.log("finds scroll position: " + window.scrollY);
@@ -501,13 +504,13 @@ console.log("attached func");
 
 // this function needs to be below for reasons of attaching the event listener
 async function insertAllChapters() {
-	localStorage.setItem("fullTextLoaded", "true");
+	localStorage.setItem(window.location.href + "fullTextLoaded", true);
 	// removes all the normal chapter content
 	prepPage();
 
 	// makes the light grey slightly transparent overlay
 	let overlay = document.createElement("div");
-	overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+	overlay.style.backgroundColor = "rgba(0, 0, 0, 0.75)";
 	overlay.style.position = "fixed";
 	overlay.style.width = "100%";
 	overlay.style.height = "100%";
@@ -564,32 +567,24 @@ async function insertAllChapters() {
 		fullComments = fullComments.concat(contents[2]);
 	}
 
-	for (const comment of fullComments) {
-		document.querySelector(".comment-container").appendChild(comment);
-	}
-
 	// change the comment number - it's inconsistent with the length of the array bc subcomments are counted
 	let commentNum = document.querySelectorAll(".caption-subject");
 	commentNum[commentNum.length - 1].innerHTML = "Comments(" + totalComments + ")";
 
-    // fullComments = splitArray(fullComments, 10);
-	// console.log(fullComments);
-	//
-	// let pagination = document.createElement("ul");
-	// pagination.setAttribute("class", "pagination justify-content-center")
-	// pagination = fullPaginationGen(pagination, fullComments);
-	//
-	// console.log(pagination);
-	//
-	// let lastGroup = fullComments[fullComments.length - 1];
-	// let lastComment = lastGroup[lastGroup.length - 1];
-	// console.log(lastComment);
-	// lastComment.insertAdjacentElement("afterend", pagination);
-	//
-	// let last = fullComments.length;
-	// console.log("last: " + last);
-	// loadCommentsPage(fullComments, 0, 4, pagination);
-	// loadCommentsPage(fullComments, 4, 5, pagination);
+    let splitComments = splitArray(fullComments, 10);
+	console.log(splitComments);
+
+	let pagination = document.createElement("ul");
+	pagination.setAttribute("class", "pagination justify-content-center")
+	pagination = fullPaginationGen(splitComments);
+	console.log(pagination);
+
+	let lastComment = fullComments[fullComments.length - 1];
+	lastComment.insertAdjacentElement("afterend", pagination);
+
+	let last = splitComments.length;
+	console.log("last: " + last);
+	loadCommentsPage(splitComments, 0);
 
 	console.log("end of story");
 	// remove the overlay
