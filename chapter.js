@@ -47,13 +47,13 @@ function cleanHTML(html, i, link) {
 		let spoilerWrapper1 = document.createElement("div");
 		spoilerWrapper1.setAttribute("class", "spoilerContent");
 		spoilerWrapper1.setAttribute("data-class", "spoilerContent");
-		spoilerWrapper1.appendChild(spoilerDisplay);
 		spoilerWrapper1.appendChild(spoilerCopy);
 		
 		let spoilerWrapper2 = document.createElement("div");
 		spoilerWrapper2.setAttribute("class", "spoiler");
 		spoilerWrapper2.setAttribute("data-class", "spoiler");
 		spoilerWrapper2.setAttribute("data-caption", "Spoiler");
+		spoilerWrapper2.appendChild(spoilerDisplay);
 		spoilerWrapper2.appendChild(spoilerWrapper1);
 
 
