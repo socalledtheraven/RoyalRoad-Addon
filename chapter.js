@@ -506,7 +506,7 @@ async function insertAllChapters() {
 	prepPage();
 
 	// makes the light grey slightly transparent overlay
-	var overlay = document.createElement("div");
+	let overlay = document.createElement("div");
 	overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
 	overlay.style.position = "fixed";
 	overlay.style.width = "100%";
@@ -514,9 +514,9 @@ async function insertAllChapters() {
 	overlay.style.top = 0;
 	overlay.style.left = 0;
 
-	var loadingText = document.createElement("h1");
+	let loadingText = document.createElement("h1");
 	loadingText.style.position = "fixed";
-	loadingText.style.top = "40%"; 
+	loadingText.style.top = "40%";
 	loadingText.style.left = "50%";
 	loadingText.style.transform = "translate(-50%, -50%)";
 	loadingText.style.fontSize = "36px";
@@ -526,10 +526,26 @@ async function insertAllChapters() {
 	loadingText.style.textAlign = "center";
 	loadingText.textContent = "Loading...";
 
+	let loadingAnimation = document.createElement("div");
+	loadingAnimation.style.position = "fixed";
+	loadingAnimation.style.top = "48%";
+	loadingAnimation.style.left = "49.5%";
+	loadingAnimation.style.transform = "translate(-50%)";
+	loadingAnimation.setAttribute("class", "sk-spinner sk-spinner-wandering-cubes");
+
+	let cube1 = document.createElement("div");
+	cube1.setAttribute("class", "sk-cube1");
+
+	let cube2 = document.createElement("div");
+	cube2.setAttribute("class", "sk-cube2");
+
+	loadingAnimation.appendChild(cube1);
+	loadingAnimation.appendChild(cube2);
 	// get the loading animation from the raw js like the load method.
 
 	document.body.appendChild(overlay);
 	document.body.appendChild(loadingText);
+	document.body.appendChild(loadingAnimation);
 
 	let nextLink = await getFirstChapterLink();
 	let startingLink = window.location.href;
@@ -576,4 +592,8 @@ async function insertAllChapters() {
 	// loadCommentsPage(fullComments, 4, 5, pagination);
 
 	console.log("end of story");
+	// remove the overlay
+	overlay.remove();
+	loadingText.remove();
+	loadingAnimation.remove();
 }
