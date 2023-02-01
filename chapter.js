@@ -340,6 +340,7 @@ function updatePagination(currentPage, fullComments) {
 			page.removeAttribute("class");
 		}
 	}
+
 	fullPagination.childNodes[currentPage].setAttribute("class", "page-active");
 
 	// let firstButton = document.createElement("li");
@@ -441,6 +442,7 @@ function loadCommentsPage(splitComments, currentPage) {
 	console.log(currentPage);
 	let comments = splitComments[currentPage];
 	console.log(comments);
+
 	// adds the new comments
 	for (const comment of comments) {
 		commentBody.appendChild(comment);
@@ -448,12 +450,22 @@ function loadCommentsPage(splitComments, currentPage) {
 
 	// adds the new pagination
     console.log("new page = " + currentPage);
-	comments[comments.length-1].insertAdjacentElement("afterend", updatePagination(currentPage, splitComments));
+	let wrapper1 = document.createElement("div");
+	wrapper1.setAttribute("class", "text-center");
+
+	let wrapper2 = document.createElement("div");
+	wrapper2.setAttribute("class", "text-center chapter-nav");
+
+	let fullPagination = updatePagination(currentPage, splitComments);
+	wrapper1.appendChild(fullPagination);
+	wrapper2.appendChild(wrapper1);
+
+	comments[comments.length-1].insertAdjacentElement("afterend", wrapper2);
 }
 
 function fullPaginationGen(fullComments) {
 	let pagination = document.createElement("ul");
-	pagination.setAttribute("class", "pagination");
+	pagination.setAttribute("class", "pagination justify-content-center");
 	for (let i = 0; i < fullComments.length; i++) {
 		// create a <li> element
 		let li = document.createElement("li");
@@ -573,14 +585,6 @@ async function insertAllChapters() {
 
     let splitComments = splitArray(fullComments, 10);
 	console.log(splitComments);
-
-	let pagination = document.createElement("ul");
-	pagination.setAttribute("class", "pagination justify-content-center")
-	pagination = fullPaginationGen(splitComments);
-	console.log(pagination);
-
-	let lastComment = fullComments[fullComments.length - 1];
-	lastComment.insertAdjacentElement("afterend", pagination);
 
 	let last = splitComments.length;
 	console.log("last: " + last);
