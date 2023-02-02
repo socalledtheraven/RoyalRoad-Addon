@@ -1,31 +1,137 @@
 function cleanHTML(html, i, link) {
-	let parser = new DOMParser();
-	console.log("got chapter, parsing");
-	let doc = parser.parseFromString(html, "text/html");
+	// let parser = new DOMParser();
+	// console.log("got chapter, parsing");
+	// let doc = parser.parseFromString(html, "text/html");
+	// doc = doc.querySelector("container chapter-page");
 
-	let titles = doc.querySelectorAll(".font-white");
-	let title = titles[titles.length - 1].textContent;
-	console.log("title of next chapter: " + title);
-	let note1;
-	let note2;
-	let note = doc.querySelector(".author-note-portlet");
-	if (doc.querySelectorAll(".author-note-portlet").length > 1) {
-		console.log("more than one note");
-		note1 = doc.querySelectorAll(".author-note-portlet")[0];
-		note2 = doc.querySelectorAll(".author-note-portlet")[1];
-	} else if (doc.querySelectorAll(".author-note-portlet").length === 0) {
-		console.log("no notes");
-	} else {
-		console.log("only one note");
-		if (note.compareDocumentPosition(doc.querySelector(".chapter-content")) & Node.DOCUMENT_POSITION_FOLLOWING) {
-			console.log("note is before chapter text");
-			note1 = note;
+	// let titles = doc.querySelectorAll(".font-white");
+	// let title = titles[titles.length - 1].textContent;
+	// console.log("title of next chapter: " + title);
+	// let note1;
+	// let note2;
+	// let note = doc.querySelector(".author-note-portlet");
+	// if (doc.querySelectorAll(".author-note-portlet").length > 1) {
+	// 	console.log("more than one note");
+	// 	note1 = doc.querySelectorAll(".author-note-portlet")[0];
+	// 	note2 = doc.querySelectorAll(".author-note-portlet")[1];
+	// } else if (doc.querySelectorAll(".author-note-portlet").length === 0) {
+	// 	console.log("no notes");
+	// } else {
+	// 	console.log("only one note");
+	// 	if (note.compareDocumentPosition(doc.querySelector(".chapter-content")) & Node.DOCUMENT_POSITION_FOLLOWING) {
+	// 		console.log("note is before chapter text");
+	// 		note1 = note;
+	// 	} else {
+	// 		console.log("note is after chapter text");
+	// 		note2 = note;
+	// 	}
+	// }
+	// let chapterText = doc.querySelector(".chapter-content");
+
+	// let spoilers = doc.querySelectorAll(".spoiler-new");
+	// for (const spoiler of spoilers) {
+	// 	let parent = spoiler.parentNode;
+
+	// 	let spoilerCopy = document.createElement("div");
+	// 	spoilerCopy.setAttribute("class", "spoiler-inner");
+	// 	spoilerCopy.setAttribute("data-class", "spoiler-inner");
+	// 	spoilerCopy.setAttribute("style", "display: none;");
+	// 	spoilerCopy.innerHTML = spoiler.innerHTML;
+
+	// 	let spoilerDisplay = document.createElement("div");
+	// 	spoilerDisplay.setAttribute("class", "smalltext");
+	// 	spoilerDisplay.setAttribute("style", "margin-bottom: 2px;");
+	// 	spoilerDisplay.innerHTML = '<strong>Spoiler</strong> <input class="spoilerButton btn btn-default btn-xs" type="button" value="Show" data-class="spoilerButton">'
+
+	// 	let spoilerWrapper1 = document.createElement("div");
+	// 	spoilerWrapper1.setAttribute("class", "spoilerContent");
+	// 	spoilerWrapper1.setAttribute("data-class", "spoilerContent");
+	// 	spoilerWrapper1.appendChild(spoilerCopy);
+		
+	// 	let spoilerWrapper2 = document.createElement("div");
+	// 	spoilerWrapper2.setAttribute("class", "spoiler");
+	// 	spoilerWrapper2.setAttribute("data-class", "spoiler");
+	// 	spoilerWrapper2.setAttribute("data-caption", "Spoiler");
+	// 	spoilerWrapper2.appendChild(spoilerDisplay);
+	// 	spoilerWrapper2.appendChild(spoilerWrapper1);
+
+	// 	parent.replaceChild(spoilerWrapper2, spoiler);
+	// }
+
+	// let poll = doc.querySelector(".portlet .light");
+	// let next = doc.querySelector(".nav-buttons");
+
+	// let commentsContainer = doc.querySelector(".comments-container");
+	// let numComments = commentsContainer.querySelector(".caption-subject");
+	// numComments = Number(numComments.textContent.trim().split("(")[1].replace(")", ""));
+
+	// // get the next chapter link if it exists
+	// let nextLink = null;
+	// try {
+	// 	if (next.children[1].children[0].getAttribute("href") != null) {
+	// 		nextLink = "https://www.royalroad.com" + next.children[1].children[0].getAttribute("href");
+	// 	}
+	// } catch (e) {
+	// 	console.log("no next chapter");
+	// }
+
+	// // combine the notes and the chapter text
+	// // if the chapter is the first one, don't add a horizontal rule
+	// let chapter = "";
+	// if (i !== 1) {
+	// 	chapter = "<hr>";
+	// }
+
+	// // only add the existing notes
+	// if ((note1 != null) && (note2 != null) && (poll != null)) {
+	// 	chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML + note2.outerHTML + poll.outerHTML;
+	// } else if (note1 != null) {
+	// 	chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML;
+	// } else if (note2 != null) {
+	// 	chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + note2.outerHTML;
+	// } else if (poll != null) {
+	// 	chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + poll.outerHTML;
+	// } else {
+	// 	chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML;
+	// }
+
+	// console.log("parsed chapter");
+	// // turns the html into elements
+	// let temp = document.createElement("div");
+	// temp.innerHTML = chapter;
+	// let chapterContents = Array.from(temp.children);
+	// return [chapterContents, nextLink, numComments, title];
+
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(html, "text/html");
+	const container = doc.querySelector("container chapter-page");
+
+	const titleEl = container.querySelector(".font-white:last-child");
+	const title = titleEl.textContent;
+	const notes = [...container.querySelectorAll(".author-note-portlet")];
+	const chapterText = container.querySelector(".chapter-content");
+	const spoilers = [...container.querySelectorAll(".spoiler-new")];
+	const poll = container.querySelector(".portlet .light");
+	const next = container.querySelector(".nav-buttons");
+	const commentsContainer = container.querySelector(".comments-container");
+	const numComments = Number(commentsContainer.querySelector(".caption-subject").textContent.trim().split("(")[1].replace(")", ""));
+
+	const nextLink = next && next.children[1].children[0].getAttribute("href") && `https://www.royalroad.com${next.children[1].children[0].getAttribute("href")}`;
+
+	let chapter = i !== 1 ? "<hr>" : "";
+	if (notes.length === 2) {
+		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>${notes[0].outerHTML}${chapterText.outerHTML}${notes[1].outerHTML}${poll.outerHTML}`;
+	} else if (notes.length === 1) {
+		const note = notes[0];
+		const notePosition = note.compareDocumentPosition(chapterText);
+		if (notePosition & Node.DOCUMENT_POSITION_FOLLOWING) {
+			chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>${note.outerHTML}${chapterText.outerHTML}${poll.outerHTML}`;
 		} else {
-			console.log("note is after chapter text");
-			note2 = note;
+			chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>${chapterText.outerHTML}${note.outerHTML}${poll.outerHTML}`;
 		}
+	} else {
+		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>${chapterText.outerHTML}${poll.outerHTML}`;
 	}
-	let chapterText = doc.querySelector(".chapter-content");
 
 	let spoilers = doc.querySelectorAll(".spoiler-new");
 	for (const spoiler of spoilers) {
@@ -57,49 +163,13 @@ function cleanHTML(html, i, link) {
 		parent.replaceChild(spoilerWrapper2, spoiler);
 	}
 
-	let poll = doc.querySelector(".portlet .light");
-	let next = doc.querySelector(".nav-buttons");
-
-	let commentsContainer = doc.querySelector(".comments-container");
-	let numComments = commentsContainer.querySelector(".caption-subject");
-	numComments = Number(numComments.textContent.trim().split("(")[1].replace(")", ""));
-
-	// get the next chapter link if it exists
-	let nextLink = null;
-	try {
-		if (next.children[1].children[0].getAttribute("href") != null) {
-			nextLink = "https://www.royalroad.com" + next.children[1].children[0].getAttribute("href");
-		}
-	} catch (e) {
-		console.log("no next chapter");
-	}
-
-	// combine the notes and the chapter text
-	// if the chapter is the first one, don't add a horizontal rule
-	let chapter = "";
-	if (i !== 1) {
-		chapter = "<hr>";
-	}
-
-	// only add the existing notes
-	if ((note1 != null) && (note2 != null) && (poll != null)) {
-		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML + note2.outerHTML + poll.outerHTML;
-	} else if (note1 != null) {
-		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML;
-	} else if (note2 != null) {
-		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + note2.outerHTML;
-	} else if (poll != null) {
-		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + poll.outerHTML;
-	} else {
-		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML;
-	}
-
 	console.log("parsed chapter");
 	// turns the html into elements
 	let temp = document.createElement("div");
 	temp.innerHTML = chapter;
 	let chapterContents = Array.from(temp.children);
 	return [chapterContents, nextLink, numComments, title];
+
 }
 
 function splitArray(array, chunkSize) {
@@ -379,65 +449,37 @@ function updatePagination(currentPage, fullComments) {
 	let prevButton = document.createElement("li");
 	prevButton.appendChild(document.createElement("a"));
 	prevButton.children[0].setAttribute("data-page", currentPage);
-	prevButton.children[0].textContent = "Last »";
+	prevButton.children[0].textContent = "‹ Previous";
 	prevButton.children[0].addEventListener("click", function () {
 		console.log("clicked last page, " + currentPage-1);
 		loadCommentsPage(fullComments, currentPage-1);
 	});
 
-	if ((currentPage !== 0 || currentPage !== 1) && (currentPage !== last || currentPage !== last-1)) {
-		fullPagination.prepend(firstButton);
-		fullPagination.prepend(prevButton);
+	if (currentPage === 0) {
+		fullPagination.append(nextButton);
+		fullPagination.append(lastButton);
 	} else if (currentPage === 1) {
 		fullPagination.prepend(firstButton);
+		fullPagination.append(nextButton);
+		fullPagination.append(lastButton);
+	} else if (currentPage === last+1) {
+		console.log("penultimate");
+		fullPagination.prepend(prevButton);
+		fullPagination.prepend(firstButton);
+		fullPagination.append(lastButton);
+	} else if (currentPage === last+2) {
+		console.log("last");
+		fullPagination.prepend(prevButton);
+		fullPagination.prepend(firstButton);
+	} else {
+		fullPagination.prepend(prevButton);
+		fullPagination.prepend(firstButton);
+		fullPagination.append(nextButton);
+		fullPagination.append(lastButton);
 	}
 
 	fullPagination.appendChild(lastButton);
 
-	
-    // // iterate through all the pages and add the event listeners
-	// console.log(fullPagination.children);
-    // for (const page of fullPagination.children) {
-    //     page.children[0].addEventListener("click", function() {
-    //         let page = this.getAttribute("data-page");
-    //         console.log("clicked page " + page);
-    //         loadCommentsPage(fullComments, currentPage, page-1, pagination);
-    //     });
-    // }
-	//
-	// // active pages are 2 pages +- the current page or 5 pages, if in the first couple pages or last couple pages
-	// let activePages;
-	// if (currentPage === 0) {
-	// 	activePages = [fullPagination.childNodes[0], fullPagination.childNodes[1], fullPagination.childNodes[2], fullPagination.childNodes[3], fullPagination.childNodes[4], nextButton, lastButton];
-	// } else if (currentPage === 1) {
-	// 	activePages = [firstButton, fullPagination.childNodes[0], fullPagination.childNodes[1], fullPagination.childNodes[2], fullPagination.childNodes[3], fullPagination.childNodes[4], nextButton, lastButton];
-	// } else if (currentPage === fullPagination.children.length - 1) {
-	// 	console.log("last page");
-	// 	activePages = [firstButton, prevButton, fullPagination.childNodes[fullPagination.children.length - 3], fullPagination.childNodes[fullPagination.children.length - 2], fullPagination.childNodes[fullPagination.children.length - 1]];
-	// } else if (currentPage === fullPagination.children.length - 2) {
-	// 	console.log("second to last page");
-	// 	activePages = [firstButton, prevButton, fullPagination.childNodes[fullPagination.children.length - 4], fullPagination.childNodes[fullPagination.children.length - 3], fullPagination.childNodes[fullPagination.children.length - 2], fullPagination.childNodes[fullPagination.children.length - 1], lastButton];
-	// } else {
-	// 	console.log("middle page");
-	// 	console.log(currentPage);
-	// 	activePages = [firstButton, prevButton, fullPagination.childNodes[currentPage - 2], fullPagination.childNodes[currentPage - 1], fullPagination.childNodes[currentPage], fullPagination.childNodes[currentPage + 1], fullPagination.childNodes[currentPage + 2], nextButton, lastButton];
-	// }
-	//
-	// // remove all of pagination's children
-	// console.log(pagination);
-	// while (pagination.firstChild) {
-	// 	console.log(pagination.children);
-	// 	console.log(pagination.firstChild);
-	// 	pagination.removeChild(pagination.firstChild);
-	// }
-	//
-	// console.log(pagination);
-	// // add the active pages
-	// let l = activePages.length;
-	// console.log(activePages);
-	// for (let i = 0; i < l; i++) {
-	// 	pagination.appendChild(activePages[i]);
-	// }
 
 	return fullPagination;
 }
@@ -448,11 +490,9 @@ function loadCommentsPage(splitComments, currentPage) {
 	while (commentBody.firstChild) {
 		commentBody.removeChild(commentBody.firstChild);
 	}
-	console.log(splitComments);
 
 	console.log("current page is " + currentPage);
 	let comments = splitComments[currentPage];
-	console.log(comments);
 
 	// adds the new comments
 	for (const comment of comments) {
