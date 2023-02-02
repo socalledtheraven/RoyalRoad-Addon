@@ -319,15 +319,19 @@ async function insertNewChapter(link, i, isStartingChapter) {
 async function getFirstChapterLink() {
 	// gets the link to the first chapter of the story via the fiction page button and the start reading button
 	const storyUrl = "https://www.royalroad.com" + document.querySelector(".margin-bottom-5").getAttribute("href");
+	
 	const response = await fetch(storyUrl);
 	let html = await response.text();
+
 	let parser = new DOMParser();
 	console.log("got homepage");
 	let doc = parser.parseFromString(html, "text/html");
+	
 	// grabs from chapter link
 	let chaps = doc.querySelector("#chapters");
 	let firstRow = chaps.children[1].children[0].children[0];
 	let firstChapterLink = "https://www.royalroad.com" + firstRow.children[0].getAttribute("href");
+	
 	console.log("got first chapter link");
 	return firstChapterLink;
 }
@@ -363,31 +367,34 @@ function updatePagination(currentPage, fullComments) {
 		loadCommentsPage(fullComments, last);
 	});
 
-	fullPagination.prepend(firstButton);
+	let nextButton = document.createElement("li");
+	nextButton.appendChild(document.createElement("a"));
+	nextButton.children[0].setAttribute("data-page", currentPage+2);
+	nextButton.children[0].textContent = "Next ›";
+	nextButton.children[0].addEventListener("click", function () {
+		console.log("clicked page " + currentPage+2);
+		loadCommentsPage(fullComments, currentPage+1);
+	});
+
+	let prevButton = document.createElement("li");
+	prevButton.appendChild(document.createElement("a"));
+	prevButton.children[0].setAttribute("data-page", currentPage);
+	prevButton.children[0].textContent = "Last »";
+	prevButton.children[0].addEventListener("click", function () {
+		console.log("clicked last page, " + currentPage-1);
+		loadCommentsPage(fullComments, currentPage-1);
+	});
+
+	if ((currentPage !== 0 || currentPage !== 1) && (currentPage !== last || currentPage !== last-1)) {
+		fullPagination.prepend(firstButton);
+		fullPagination.prepend(prevButton);
+	} else if (currentPage === 1) {
+		fullPagination.prepend(firstButton);
+	}
+
 	fullPagination.appendChild(lastButton);
 
-	// let prevButton = document.createElement("li");
-	// prevButton.appendChild(document.createElement("a"));
-	// prevButton.children[0].setAttribute("data-page", currentPage);
-	// prevButton.children[0].textContent = "‹ Previous";
-	// prevButton.children[0].addEventListener("click", function () {
-	// 	let page = this.getAttribute("data-page");
-	// 	console.log("clicked page " + page);
-	// 	loadCommentsPage(fullComments, currentPage, page-1, pagination);
-	// });
-	//
-	// let nextButton = document.createElement("li");
-	// nextButton.appendChild(document.createElement("a"));
-	// nextButton.children[0].setAttribute("data-page", currentPage+2);
-	// nextButton.children[0].textContent = "Next ›";
-	// nextButton.children[0].addEventListener("click", function () {
-	// 	let page = this.getAttribute("data-page");
-	// 	console.log("clicked page " + page);
-	// 	loadCommentsPage(fullComments, currentPage, page-1, pagination);
-	// });
-	//
-
-	//
+	
     // // iterate through all the pages and add the event listeners
 	// console.log(fullPagination.children);
     // for (const page of fullPagination.children) {
@@ -585,7 +592,7 @@ async function insertAllChapters() {
 
 	// change the comment number - it's inconsistent with the length of the array bc subcomments are counted
 	let commentNum = document.querySelectorAll(".caption-subject");
-	commentNum[commentNum.length - 1].innerHTML = "Comments(" + totalComments + ")";
+	commentNum[commentNum.length - 1].innerHTML = "Comments (" + totalComments + ")";
 
     let splitComments = splitArray(fullComments, 10);
 	console.log(splitComments);
