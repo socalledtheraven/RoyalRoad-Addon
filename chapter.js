@@ -2,7 +2,7 @@ function cleanHTML(html, i, link) {
 	let parser = new DOMParser();
 	console.log("got chapter, parsing");
 	let doc = parser.parseFromString(html, "text/html");
-	doc = doc.querySelector("container chapter-page");
+	doc = doc.querySelector(".chapter-page");
 
 	let titles = doc.querySelectorAll(".font-white");
 	let title = titles[titles.length - 1].textContent;
@@ -337,6 +337,33 @@ async function getFirstChapterLink() {
 	return firstChapterLink;
 }
 
+function fullPaginationGen(fullComments) {
+	let pagination = document.createElement("ul");
+	pagination.setAttribute("class", "pagination justify-content-center");
+	for (let i = 0; i < fullComments.length; i++) {
+		// create a <li> element
+		let li = document.createElement("li");
+		if (i === 0) {
+			li.setAttribute("class", "page-active");
+		}
+
+		// set the text of the <li> element to the value in the array
+		let a = document.createElement("a");
+		a.setAttribute("data-page", i+1);
+		a.textContent = i+1;
+		a.addEventListener("click", function() {
+			console.log("clicked page " + i+1);
+			loadCommentsPage(fullComments, i);
+		});
+		// append the <li> element to the <ul> element
+		li.appendChild(a);
+
+		pagination.appendChild(li);
+	}
+
+	return pagination;
+}
+
 function updatePagination(currentPage, fullComments) {
 	const fullPagination = fullPaginationGen(fullComments);
 	console.log(fullPagination);
@@ -450,33 +477,6 @@ function loadCommentsPage(splitComments, currentPage) {
 	wrapper2.appendChild(wrapper1);
 
 	comments[comments.length-1].insertAdjacentElement("afterend", wrapper2);
-}
-
-function fullPaginationGen(fullComments) {
-	let pagination = document.createElement("ul");
-	pagination.setAttribute("class", "pagination justify-content-center");
-	for (let i = 0; i < fullComments.length; i++) {
-		// create a <li> element
-		let li = document.createElement("li");
-		if (i === 0) {
-			li.setAttribute("class", "page-active");
-		}
-
-		// set the text of the <li> element to the value in the array
-		let a = document.createElement("a");
-		a.setAttribute("data-page", i+1);
-		a.textContent = i+1;
-		a.addEventListener("click", function() {
-			console.log("clicked page " + i+1);
-			loadCommentsPage(fullComments, i);
-		});
-		// append the <li> element to the <ul> element
-		li.appendChild(a);
-
-		pagination.appendChild(li);
-	}
-
-	return pagination;
 }
 
 console.log("loaded chapter.js");
