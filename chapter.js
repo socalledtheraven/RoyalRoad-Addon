@@ -352,7 +352,7 @@ function fullPaginationGen(fullComments) {
 		a.setAttribute("data-page", i+1);
 		a.textContent = i+1;
 		a.addEventListener("click", function() {
-			console.log("clicked page " + i+1);
+			console.log("clicked page " + Number.parseInt(i)+1);
 			loadCommentsPage(fullComments, i);
 		});
 		// append the <li> element to the <ul> element
@@ -388,7 +388,7 @@ function updatePagination(currentPage, fullComments) {
 
 	let lastButton = document.createElement("li");
 	lastButton.appendChild(document.createElement("a"));
-	lastButton.children[0].setAttribute("data-page", last);
+	lastButton.children[0].setAttribute("data-page", last+1);
 	lastButton.children[0].textContent = "Last »";
 	lastButton.children[0].addEventListener("click", function () {
 		console.log("clicked last page, " + last);
@@ -397,19 +397,19 @@ function updatePagination(currentPage, fullComments) {
 
 	let nextButton = document.createElement("li");
 	nextButton.appendChild(document.createElement("a"));
-	nextButton.children[0].setAttribute("data-page", currentPage+2);
+	nextButton.children[0].setAttribute("data-page", currentPage+1);
 	nextButton.children[0].textContent = "Next ›";
 	nextButton.children[0].addEventListener("click", function () {
-		console.log("clicked page " + currentPage+2);
+		console.log("clicked page " + (currentPage+2));
 		loadCommentsPage(fullComments, currentPage+1);
 	});
 
 	let prevButton = document.createElement("li");
 	prevButton.appendChild(document.createElement("a"));
-	prevButton.children[0].setAttribute("data-page", currentPage);
+	prevButton.children[0].setAttribute("data-page", currentPage-1);
 	prevButton.children[0].textContent = "‹ Previous";
 	prevButton.children[0].addEventListener("click", function () {
-		console.log("clicked last page, " + currentPage-1);
+		console.log("clicked last page, " + (currentPage-1));
 		loadCommentsPage(fullComments, currentPage-1);
 	});
 
@@ -423,20 +423,54 @@ function updatePagination(currentPage, fullComments) {
 		
 		fullPagination.append(nextButton);
 		fullPagination.append(lastButton);
+
 	} else if (currentPage === 1) {
+		const children = fullPagination.querySelectorAll("[data-page]");
+		children.forEach(child => {
+			if (child.getAttribute("data-page") > 5) {
+				child.remove();
+			}
+		});
+
 		fullPagination.prepend(firstButton);
 		fullPagination.append(nextButton);
 		fullPagination.append(lastButton);
-	} else if (currentPage === last+1) {
+
+	} else if (currentPage === last) {
 		console.log("penultimate");
+		const children = fullPagination.querySelectorAll("[data-page]");
+		children.forEach(child => {
+			if (child.getAttribute("data-page") < last-4) {
+				child.remove();
+			}
+		});
+
 		fullPagination.prepend(prevButton);
 		fullPagination.prepend(firstButton);
 		fullPagination.append(lastButton);
-	} else if (currentPage === last+2) {
+
+	} else if (currentPage === last+1) {
 		console.log("last");
+		const children = fullPagination.querySelectorAll("[data-page]");
+		children.forEach(child => {
+			if (child.getAttribute("data-page") < last-4) {
+				child.remove();
+			}
+		});
+
 		fullPagination.prepend(prevButton);
 		fullPagination.prepend(firstButton);
+
 	} else {
+		console.log(currentPage);
+		console.log(currentPage-3);
+		console.log(currentPage+1);
+		const children = fullPagination.querySelectorAll("[data-page]");
+		children.forEach(child => {
+			if (!(currentPage-3 >= child.getAttribute("data-page") && child.getAttribute("data-page") <= currentPage+1)) {
+				child.remove();
+			}
+		});
 		fullPagination.prepend(prevButton);
 		fullPagination.prepend(firstButton);
 		fullPagination.append(nextButton);
@@ -486,7 +520,7 @@ window.addEventListener("load", function() {
 		console.log("preloaded");
 		insertAllChapters().then(function () {
 			console.log("scrolling to " + localStorage.getItem("previousScrollY"));
-			window.scrollTo(0, localStorage.getItem("previousScrollY"));
+			window.scrollTo(0, Number.parseInt(localStorage.getItem("previousScrollY")));
 		});
 	}
 });
