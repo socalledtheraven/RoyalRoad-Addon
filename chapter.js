@@ -352,7 +352,6 @@ function fullPaginationGen(fullComments) {
 		a.setAttribute("data-page", i+1);
 		a.textContent = i+1;
 		a.addEventListener("click", function() {
-			console.log("clicked page " + Number.parseInt(i)+1);
 			loadCommentsPage(fullComments, i);
 		});
 		// append the <li> element to the <ul> element
@@ -364,9 +363,21 @@ function fullPaginationGen(fullComments) {
 	return pagination;
 }
 
+function createButton(name, fullComments, page) {
+	let button = document.createElement("li");
+	button.appendChild(document.createElement("a"));
+	button.children[0].setAttribute("data-page", page+1);
+	button.children[0].textContent = name;
+	button.children[0].addEventListener("click", function () {
+		console.log("clicked first page");
+		loadCommentsPage(fullComments, page);
+	});
+
+	return button;
+}
+
 function updatePagination(currentPage, fullComments) {
 	const fullPagination = fullPaginationGen(fullComments);
-	console.log(fullPagination);
 	for (const page of fullPagination.childNodes) {
 		if (page.hasAttribute("class")) {
 			page.removeAttribute("class");
@@ -375,43 +386,15 @@ function updatePagination(currentPage, fullComments) {
 
 	fullPagination.childNodes[currentPage].setAttribute("class", "page-active");
 
-	let firstButton = document.createElement("li");
-	firstButton.appendChild(document.createElement("a"));
-	firstButton.children[0].setAttribute("data-page", 1);
-	firstButton.children[0].textContent = "« First";
-	firstButton.children[0].addEventListener("click", function () {
-		console.log("clicked first page");
-		loadCommentsPage(fullComments, 0);
-	});
+	let firstButton = createButton("« First", fullComments, 0);
 
 	let last = fullPagination.children.length - 1;
 
-	let lastButton = document.createElement("li");
-	lastButton.appendChild(document.createElement("a"));
-	lastButton.children[0].setAttribute("data-page", last+1);
-	lastButton.children[0].textContent = "Last »";
-	lastButton.children[0].addEventListener("click", function () {
-		console.log("clicked last page, " + last);
-		loadCommentsPage(fullComments, last);
-	});
+	let lastButton = createButton("Last »", fullComments, last);
 
-	let nextButton = document.createElement("li");
-	nextButton.appendChild(document.createElement("a"));
-	nextButton.children[0].setAttribute("data-page", currentPage+1);
-	nextButton.children[0].textContent = "Next ›";
-	nextButton.children[0].addEventListener("click", function () {
-		console.log("clicked page " + (currentPage+2));
-		loadCommentsPage(fullComments, currentPage+1);
-	});
+	let nextButton = createButton("Next ›", fullComments, currentPage+1);
 
-	let prevButton = document.createElement("li");
-	prevButton.appendChild(document.createElement("a"));
-	prevButton.children[0].setAttribute("data-page", currentPage-1);
-	prevButton.children[0].textContent = "‹ Previous";
-	prevButton.children[0].addEventListener("click", function () {
-		console.log("clicked last page, " + (currentPage-1));
-		loadCommentsPage(fullComments, currentPage-1);
-	});
+	let prevButton = createButton("‹ Previous", fullComments, currentPage-1);
 
 	if (currentPage === 0) {
 		const children = fullPagination.querySelectorAll("[data-page]");
@@ -436,11 +419,11 @@ function updatePagination(currentPage, fullComments) {
 		fullPagination.append(nextButton);
 		fullPagination.append(lastButton);
 
-	} else if (currentPage === last) {
+	} else if (currentPage === last-1) {
 		console.log("penultimate");
 		const children = fullPagination.querySelectorAll("[data-page]");
 		children.forEach(child => {
-			if (child.getAttribute("data-page") < last-4) {
+			if (child.getAttribute("data-page") < last-2) {
 				child.remove();
 			}
 		});
@@ -449,11 +432,11 @@ function updatePagination(currentPage, fullComments) {
 		fullPagination.prepend(firstButton);
 		fullPagination.append(lastButton);
 
-	} else if (currentPage === last+1) {
+	} else if (currentPage === last) {
 		console.log("last");
 		const children = fullPagination.querySelectorAll("[data-page]");
 		children.forEach(child => {
-			if (child.getAttribute("data-page") < last-4) {
+			if (child.getAttribute("data-page") < last-1) {
 				child.remove();
 			}
 		});
@@ -462,12 +445,10 @@ function updatePagination(currentPage, fullComments) {
 		fullPagination.prepend(firstButton);
 
 	} else {
-		console.log(currentPage);
-		console.log(currentPage-3);
-		console.log(currentPage+1);
 		const children = fullPagination.querySelectorAll("[data-page]");
 		children.forEach(child => {
-			if (!(currentPage-3 >= child.getAttribute("data-page") && child.getAttribute("data-page") <= currentPage+1)) {
+            // deletes every page NOT between the 2 pages either side of the current page
+			if (!(currentPage-1 <= child.getAttribute("data-page") && child.getAttribute("data-page") <= currentPage+3)) {
 				child.remove();
 			}
 		});
@@ -476,9 +457,6 @@ function updatePagination(currentPage, fullComments) {
 		fullPagination.append(nextButton);
 		fullPagination.append(lastButton);
 	}
-
-	fullPagination.appendChild(lastButton);
-
 
 	return fullPagination;
 }
