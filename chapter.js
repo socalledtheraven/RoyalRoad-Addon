@@ -527,8 +527,8 @@ async function insertAllChapters() {
 	overlay.style.position = "fixed";
 	overlay.style.width = "100%";
 	overlay.style.height = "100%";
-	overlay.style.top = 0;
-	overlay.style.left = 0;
+	overlay.style.top = "0%";
+	overlay.style.left = "0%";
 
 	let loadingText = document.createElement("h1");
 	loadingText.style.position = "fixed";
@@ -575,6 +575,35 @@ async function insertAllChapters() {
 		counter++;
 		startingChap = nextLink === startingLink;
 		let contents = await insertNewChapter(nextLink, counter, startingChap);
+		if (startingChap) {
+			let parent = document.createElement("div");
+			parent.style.display = "flex";
+			parent.style.alignItems = "center";
+			parent.style.justifyContent = "space-between";
+
+			overlay.style.width = "100%";
+			overlay.style.height = "5em";
+			overlay.style.top = "3%";
+			overlay.style.left = "0%";
+			overlay.style.alignSelf = "center";
+
+			loadingText.style.top = "4%";
+			// loadingText.style.left = "3em";
+			loadingText.style.color = "white";
+			loadingText.style.fontSize = "36px";
+			loadingText.style.textAlign = "center";
+			loadingText.style.marginInline = "-1em";
+			parent.appendChild(loadingText);
+
+			loadingAnimation.style.top = "4%";
+			loadingAnimation.style.marginInline = "5em";
+			// loadingAnimation.style.right = "1em";
+			// loadingAnimation.style.alignSelf = "right";
+
+			parent.appendChild(loadingAnimation);
+			overlay.appendChild(parent);
+			document.body.appendChild(overlay);
+		}
 		nextLink = contents[0];
 		totalComments += contents[1];
 		fullComments = fullComments.concat(contents[2]);
@@ -592,6 +621,10 @@ async function insertAllChapters() {
 	loadCommentsPage(splitComments, 0);
 
 	console.log("end of story");
+
+	localStorage.setItem(window.location.href + "fullComments", JSON.stringify(fullComments));
+	let story = document.querySelector(".portlet-body");
+	localStorage.setItem(window.location.href + "story", story);
 	// remove the overlay
 	overlay.remove();
 	loadingText.remove();
