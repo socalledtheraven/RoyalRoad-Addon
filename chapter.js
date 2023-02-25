@@ -84,15 +84,15 @@ function cleanHTML(html, i, link) {
 
 	// only add the existing notes
 	if ((note1 != null) && (note2 != null) && (poll != null)) {
-		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML + note2.outerHTML + poll.outerHTML;
+		chapter += `<h2 class="font-black" id="chapter-title"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML + note2.outerHTML + poll.outerHTML;
 	} else if (note1 != null) {
-		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML;
+		chapter += `<h2 class="font-black" id="chapter-title"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML;
 	} else if (note2 != null) {
-		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + note2.outerHTML;
+		chapter += `<h2 class="font-black" id="chapter-title"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + note2.outerHTML;
 	} else if (poll != null) {
-		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + poll.outerHTML;
+		chapter += `<h2 class="font-black" id="chapter-title"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + poll.outerHTML;
 	} else {
-		chapter += `<h2 class="font-black"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML;
+		chapter += `<h2 class="font-black" id="chapter-title"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML;
 	}
 
 	console.log("parsed chapter");
@@ -491,6 +491,29 @@ function loadCommentsPage(splitComments, currentPage) {
 	comments[comments.length-1].insertAdjacentElement("afterend", wrapper2);
 }
 
+function scrollHandling() {
+	// Define a list of all <a> tags inside <h2> tags
+	const links = Array.from(document.querySelectorAll('h2 a')).map(link => link.href);
+
+	// Define a callback function to handle intersection changes
+	const handleIntersection = entries => {
+		console.log('handleIntersection called with entries:', entries);
+		// Find the <a> tag that is currently visible
+		const visibleLink = entries.find(entry => entry.isIntersecting)?.target.href;
+
+		// If a visible <a> tag was found, update the URL
+		if (visibleLink) {
+			history.replaceState(null, null, visibleLink);
+		}
+	};
+
+	// Create a new Intersection Observer instance
+	const observer = new IntersectionObserver(handleIntersection);
+
+	// Observe all <h2> tags
+	document.querySelectorAll('h2').forEach(h2 => observer.observe(h2));
+}
+
 console.log("loaded chapter.js");
 window.addEventListener("load", function() {
 	console.log("loaded");
@@ -514,6 +537,9 @@ document.getElementById("runFunction").addEventListener("click", function() {
 	insertAllChapters();
 }, false);
 console.log("attached func");
+
+
+
 
 // this function needs to be below for reasons of attaching the event listener
 async function insertAllChapters() {
@@ -629,4 +655,6 @@ async function insertAllChapters() {
 	overlay.remove();
 	loadingText.remove();
 	loadingAnimation.remove();
+
+	scrollHandling();
 }
