@@ -78,24 +78,20 @@ function cleanHTML(html, i, link) {
 	// combine the notes and the chapter text
 	// if the chapter is the first one, don't add a horizontal rule
 	let chapter = "";
-	if (i !== 1) {
-		chapter = "<hr>";
-	}
 
 	// only add the existing notes
 	if ((note1 != null) && (note2 != null) && (poll != null)) {
-		chapter += `<h2 class="font-black" id="chapter-title"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML + note2.outerHTML + poll.outerHTML;
+		chapter += `<h2 class="font-black"><a id="chapter-title" href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML + note2.outerHTML + poll.outerHTML + `<a id='chapter-title' href="${link}"></a>` + `<hr>`;
 	} else if (note1 != null) {
-		chapter += `<h2 class="font-black" id="chapter-title"><a href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML;
+		chapter += `<h2 class="font-black"><a id="chapter-title" href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML + `<a id='chapter-title' href="${link}"></a>` + `<hr>`;
 	} else if (note2 != null) {
-		chapter += `<h2 class="font-black" id="chapter-title"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + note2.outerHTML;
+		chapter += `<h2 class="font-black"><a id="chapter-title" href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + note2.outerHTML + `<a id='chapter-title' href="${link}"></a>` + `<hr>`;
 	} else if (poll != null) {
-		chapter += `<h2 class="font-black" id="chapter-title"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + poll.outerHTML;
+		chapter += `<h2 class="font-black"><a id="chapter-title" href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + poll.outerHTML + `<a id='chapter-title' href="${link}"></a>` + `<hr>`;
 	} else {
-		chapter += `<h2 class="font-black" id="chapter-title"><a href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML;
+		chapter += `<h2 class="font-black"><a id="chapter-title" href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + `<a id='chapter-title' href="${link}"></a>` + `<hr>`;
 	}
 
-	console.log("parsed chapter");
 	// turns the html into elements
 	let temp = document.createElement("div");
 	temp.innerHTML = chapter;
@@ -420,7 +416,7 @@ function updatePagination(currentPage, fullComments) {
 		fullPagination.append(lastButton);
 
 	} else if (currentPage === last-1) {
-		console.log("penultimate");
+		console.log("penultimate chapter of the story");
 		const children = fullPagination.querySelectorAll("[data-page]");
 		children.forEach(child => {
 			if (child.getAttribute("data-page") < last-2) {
@@ -433,7 +429,7 @@ function updatePagination(currentPage, fullComments) {
 		fullPagination.append(lastButton);
 
 	} else if (currentPage === last) {
-		console.log("last");
+		console.log("last chapter of the story");
 		const children = fullPagination.querySelectorAll("[data-page]");
 		children.forEach(child => {
 			if (child.getAttribute("data-page") < last-1) {
@@ -492,14 +488,9 @@ function loadCommentsPage(splitComments, currentPage) {
 }
 
 function scrollHandling() {
-	// Define a list of all <a> tags inside <h2> tags
-	const links = Array.from(document.querySelectorAll('h2 a')).map(link => link.href);
-
-	// Define a callback function to handle intersection changes
 	const handleIntersection = entries => {
-		console.log('handleIntersection called with entries:', entries);
 		// Find the <a> tag that is currently visible
-		const visibleLink = entries.find(entry => entry.isIntersecting)?.target.href;
+		const visibleLink = entries.find(entry => entry.isIntersecting).target.href;
 
 		// If a visible <a> tag was found, update the URL
 		if (visibleLink) {
@@ -510,8 +501,8 @@ function scrollHandling() {
 	// Create a new Intersection Observer instance
 	const observer = new IntersectionObserver(handleIntersection);
 
-	// Observe all <h2> tags
-	document.querySelectorAll('h2').forEach(h2 => observer.observe(h2));
+	// Observe all title tags and the previous hr tag to track the going backward bit
+	document.querySelectorAll('#chapter-title').forEach(title => observer.observe(title));
 }
 
 console.log("loaded chapter.js");
@@ -527,7 +518,6 @@ window.addEventListener("load", function() {
 });
 
 window.addEventListener("beforeunload", function() {
-	console.log("finds scroll position: " + window.scrollY);
 	localStorage.setItem("previousScrollY", window.scrollY);
 });
 
@@ -536,9 +526,6 @@ fixButtons();
 document.getElementById("runFunction").addEventListener("click", function() {
 	insertAllChapters();
 }, false);
-console.log("attached func");
-
-
 
 
 // this function needs to be below for reasons of attaching the event listener
@@ -614,7 +601,6 @@ async function insertAllChapters() {
 			overlay.style.alignSelf = "center";
 
 			loadingText.style.top = "4%";
-			// loadingText.style.left = "3em";
 			loadingText.style.color = "white";
 			loadingText.style.fontSize = "36px";
 			loadingText.style.textAlign = "center";
@@ -623,8 +609,6 @@ async function insertAllChapters() {
 
 			loadingAnimation.style.top = "4%";
 			loadingAnimation.style.marginInline = "5em";
-			// loadingAnimation.style.right = "1em";
-			// loadingAnimation.style.alignSelf = "right";
 
 			parent.appendChild(loadingAnimation);
 			overlay.appendChild(parent);
@@ -640,10 +624,8 @@ async function insertAllChapters() {
 	commentNum[commentNum.length - 1].innerHTML = "Comments (" + totalComments + ")";
 
     let splitComments = splitArray(fullComments, 10);
-	console.log(splitComments);
+    console.log(fullComments.length + " comments for whole story");
 
-	let last = splitComments.length;
-	console.log("last: " + last);
 	loadCommentsPage(splitComments, 0);
 
 	console.log("end of story");
