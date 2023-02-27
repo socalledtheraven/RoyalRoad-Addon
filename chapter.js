@@ -487,22 +487,40 @@ function loadCommentsPage(splitComments, currentPage) {
 	comments[comments.length-1].insertAdjacentElement("afterend", wrapper2);
 }
 
-function scrollHandling() {
-	const handleIntersection = entries => {
-		// Find the <a> tag that is currently visible
-		const visibleLink = entries.find(entry => entry.isIntersecting).target.href;
-
-		// If a visible <a> tag was found, update the URL
-		if (visibleLink) {
-			history.replaceState(null, null, visibleLink);
-		}
-	};
-
+async function scrollHandling() {
 	// Create a new Intersection Observer instance
 	const observer = new IntersectionObserver(handleIntersection);
 
 	// Observe all title tags and the previous hr tag to track the going backward bit
 	document.querySelectorAll('#chapter-title').forEach(title => observer.observe(title));
+}
+
+async function handleIntersection(entries) {
+	// Find the <a> tag that is currently visible
+	const visibleLink = entries.find(entry => entry.isIntersecting).target.href;
+
+	// If a visible <a> tag was found, update the URL
+	if (visibleLink) {
+		history.replaceState(null, null, visibleLink);
+		await updateChapterProgress(visibleLink);
+	}
+}
+
+async function updateChapterProgress(url) {
+	let response = await fetch(url);
+	let html = await response.text();
+	console.log("loaded");
+	clickButton(html);
+}
+
+function clickButton(html) {
+	let parser = new DOMParser();
+	let doc = parser.parseFromString(html, "text/html");
+
+	const button = doc.querySelector('form.rewind-form');
+	console.log("button got");
+
+	button.click();
 }
 
 console.log("loaded chapter.js");
@@ -638,5 +656,5 @@ async function insertAllChapters() {
 	loadingText.remove();
 	loadingAnimation.remove();
 
-	scrollHandling();
+	await scrollHandling();
 }
