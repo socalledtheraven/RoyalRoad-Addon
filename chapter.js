@@ -238,7 +238,6 @@ function prepPage() {
 	buttons.remove();
 	buttons2.remove();
 	chap.remove();
-	ad.remove();
 	adz.forEach(function(e) {
 		e.remove();
 	});
