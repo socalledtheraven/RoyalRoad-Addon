@@ -63,26 +63,15 @@ function cleanHTML(html, i, link) {
 		e.remove();
 	});
 
-	let poll = doc.querySelector(".portlet .light");
-	let next = doc.querySelector(".nav-buttons");
 
 	let commentsContainer = doc.querySelector(".comments-container");
 	let numComments = commentsContainer.querySelector(".caption-subject");
 	numComments = Number(numComments.textContent.trim().split("(")[1].replace(")", ""));
 
-	// get the next chapter link if it exists
-	let nextLink = null;
-	try {
-		if (next.children[1].children[0].getAttribute("href") != null) {
-			nextLink = "https://www.royalroad.com" + next.children[1].children[0].getAttribute("href");
-		}
-	} catch (e) {
-		console.log("no next chapter");
-	}
-
 	// combine the notes and the chapter text
 	// if the chapter is the first one, don't add a horizontal rule
 	let chapter = "";
+	let poll = doc.querySelector(".portlet .light");
 
 	// only add the existing notes
 	if ((note1 != null) && (note2 != null) && (poll != null)) {
@@ -101,7 +90,7 @@ function cleanHTML(html, i, link) {
 	let temp = document.createElement("div");
 	temp.innerHTML = chapter;
 	let chapterContents = Array.from(temp.children);
-	return [chapterContents, nextLink, numComments, title];
+	return [chapterContents, numComments, title];
 }
 
 function splitArray(array, chunkSize) {
@@ -279,9 +268,8 @@ async function insertNewChapter(link, i, isStartingChapter) {
 	// appends the comments to the chapter contents
 
 	let chapterContents = contents[0];
-	let nextLink = contents[1];
-	let numComments = contents[2];
-	let title = contents[3];
+	let numComments = contents[1];
+	let title = contents[2];
 
 	// inserts the chapter (you have to do some bs to avoid the removal from the array)
 	let lastHr = hr[hr.length - 1];
@@ -307,10 +295,10 @@ async function insertNewChapter(link, i, isStartingChapter) {
 
 	console.log("finished processing comments");
 
-	return [nextLink, numComments, comments];
+	return [numComments, comments];
 }
 
-async function getFirstChapterLink() {
+async function getAllChapterLinks() {
 	// gets the link to the first chapter of the story via the fiction page button and the start reading button
 	const storyUrl = "https://www.royalroad.com" + document.querySelector(".margin-bottom-5").getAttribute("href");
 	
@@ -321,13 +309,17 @@ async function getFirstChapterLink() {
 	console.log("got homepage");
 	let doc = parser.parseFromString(html, "text/html");
 	
-	// grabs from chapter link
-	let chaps = doc.querySelector("#chapters");
-	let firstRow = chaps.children[1].children[0].children[0];
-	let firstChapterLink = "https://www.royalroad.com" + firstRow.children[0].getAttribute("href");
+	// grabs from table
+	let links = [];
+	let table = doc.querySelector("#chapters").children[1];
+	let row;
+	for (let i = 0; i < table.children.length; i++) {
+		row = table.children[i];
+		links.push("https://www.royalroad.com" + row.children[0].children[0].getAttribute("href"));
+	}
 	
-	console.log("got first chapter link");
-	return firstChapterLink;
+	console.log("got chapter links");
+	return links;
 }
 
 function fullPaginationGen(fullComments) {
@@ -591,19 +583,18 @@ async function insertAllChapters() {
 	document.body.appendChild(loadingText);
 	document.body.appendChild(loadingAnimation);
 
-	let nextLink = await getFirstChapterLink();
+	let chapterLinks = await getAllChapterLinks();
 	let startingLink = window.location.href;
 
 	// loop through until I hit a 404
-	let counter = 0;
 	let startingChap = false;
 	let totalComments = 0;
 	let fullComments = [];
-	while (nextLink != null) {
-		counter++;
+	// here is where we overhaul
+	for (let i = 0; i < chapterLinks.length; i++) {
 		// checks if the first chapter of the story's link and the current link are the same
-		startingChap = nextLink === startingLink;
-		let contents = await insertNewChapter(nextLink, counter, startingChap);
+		startingChap = chapterLinks[i] === startingLink;
+		let contents = await insertNewChapter(chapterLinks[i], i, startingChap);
 		if (startingChap) {
 			// makes the loading animation smaller, and at the top
 			let parent = document.createElement("div");
@@ -631,9 +622,8 @@ async function insertAllChapters() {
 			overlay.appendChild(parent);
 			document.body.appendChild(overlay);
 		}
-		nextLink = contents[0];
-		totalComments += contents[1];
-		fullComments = fullComments.concat(contents[2]);
+		totalComments += contents[0];
+		fullComments = fullComments.concat(contents[1]);
 	}
 
 	// change the comment number - it's inconsistent with the length of the array bc subcomments are counted
