@@ -284,18 +284,14 @@ async function insertNewChapter(link, i, isStartingChapter) {
 	let lastHr = hr[hr.length - 1];
 	let l = chapterContents.length;
 
-	let startChap;
 	for (let i = 0; i < l; i++) {
 		let elem = chapterContents[i];
-		// scrolls to the right chapter automatically
-		if (isStartingChapter) {
-			startChap = elem;
-		}
 		lastHr.insertAdjacentElement("beforebegin", elem);
 	}
 
+	// automatically scrolls to correct chapter
 	if (isStartingChapter) {
-		startChap.scrollIntoView();
+		chapterContents[0].scrollIntoView();
 	}
 
 	console.log("finished inserting chapter");
@@ -602,9 +598,11 @@ async function insertAllChapters() {
 	let fullComments = [];
 	while (nextLink != null) {
 		counter++;
+		// checks if the first chapter of the story's link and the current link are the same
 		startingChap = nextLink === startingLink;
 		let contents = await insertNewChapter(nextLink, counter, startingChap);
 		if (startingChap) {
+			// makes the loading animation smaller, and at the top
 			let parent = document.createElement("div");
 			parent.style.display = "flex";
 			parent.style.alignItems = "center";
@@ -649,6 +647,7 @@ async function insertAllChapters() {
 	localStorage.setItem(window.location.href + "fullComments", JSON.stringify(fullComments));
 	let story = document.querySelector(".portlet-body");
 	localStorage.setItem(window.location.href + "story", story);
+	
 	// remove the overlay
 	overlay.remove();
 	loadingText.remove();
@@ -656,3 +655,7 @@ async function insertAllChapters() {
 
 	await scrollHandling();
 }
+
+// TODO: 
+// fix ad removal on new pages, it's making blank things
+// rewrite overall way of getting chapters - get a full list from the index page and asychronously load them
