@@ -58,6 +58,11 @@ function cleanHTML(html, i, link) {
 		parent.replaceChild(spoilerWrapper2, spoiler);
 	}
 
+	let ads = doc.querySelectorAll(".t-center");
+	ads.forEach(function(e) {
+		e.remove();
+	});
+
 	let poll = doc.querySelector(".portlet .light");
 	let next = doc.querySelector(".nav-buttons");
 
@@ -199,7 +204,7 @@ function prepPage() {
 	let buttons = bod.querySelector(".nav-buttons");
 	let buttons2 = bod.querySelectorAll(".margin-left-0")[1];
 	let chap = bod.querySelector(".chapter-content");
-	let adz = bod.querySelectorAll(".t-center");
+	let ads = bod.querySelectorAll(".t-center");
 	let notes = bod.querySelectorAll(".author-note-portlet");
 	let comments = document.querySelector(".comment-container").children;
 
@@ -231,20 +236,18 @@ function prepPage() {
 		console.log("no poll");
 	}
 
-	let hrs = bod.querySelectorAll("hr");
-	let title = document.querySelector("h1.font-white");
-
-
 	buttons.remove();
 	buttons2.remove();
 	chap.remove();
-	adz.forEach(function(e) {
+	ads.forEach(function(e) {
 		e.remove();
 	});
 	notes.forEach(function(e) {
 		e.remove();
 	});
 
+	let hrs = bod.querySelectorAll("hr");
+	let title = document.querySelector("h1.font-white");
 	// remove all the hr tags except the last one
 	// use l as a variable to get around the removal of things while iterating
 	// use 0 instead of i because the first element is the one that is always deleted for some reason
@@ -657,5 +660,4 @@ async function insertAllChapters() {
 }
 
 // TODO: 
-// fix ad removal on new pages, it's making blank things
 // rewrite overall way of getting chapters - get a full list from the index page and asychronously load them
