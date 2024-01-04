@@ -199,8 +199,7 @@ function prepPage() {
 	let buttons = bod.querySelector(".nav-buttons");
 	let buttons2 = bod.querySelectorAll(".margin-left-0")[1];
 	let chap = bod.querySelector(".chapter-content");
-	let ad = bod.querySelector("h6.text-center");
-	let adz = bod.querySelectorAll(".wide");
+	let adz = bod.querySelectorAll(".t-center");
 	let notes = bod.querySelectorAll(".author-note-portlet");
 	let comments = document.querySelector(".comment-container").children;
 
