@@ -1,15 +1,18 @@
 function cleanHTML(html, i, link) {
 	let parser = new DOMParser();
 	console.log("got chapter, parsing");
+
 	let doc = parser.parseFromString(html, "text/html");
 	doc = doc.querySelector(".chapter-page");
 
 	let titles = doc.querySelectorAll(".font-white");
 	let title = titles[titles.length - 1].textContent;
 	console.log("title of next chapter: " + title);
+
 	let note1;
 	let note2;
 	let note = doc.querySelector(".author-note-portlet");
+
 	if (doc.querySelectorAll(".author-note-portlet").length > 1) {
 		console.log("more than one note");
 		note1 = doc.querySelectorAll(".author-note-portlet")[0];
@@ -18,6 +21,7 @@ function cleanHTML(html, i, link) {
 		console.log("no notes");
 	} else {
 		console.log("only one note");
+
 		if (note.compareDocumentPosition(doc.querySelector(".chapter-content")) & Node.DOCUMENT_POSITION_FOLLOWING) {
 			console.log("note is before chapter text");
 			note1 = note;
@@ -26,6 +30,7 @@ function cleanHTML(html, i, link) {
 			note2 = note;
 		}
 	}
+
 	let chapterText = doc.querySelector(".chapter-content");
 
 	let spoilers = doc.querySelectorAll(".spoiler-new");
@@ -47,7 +52,7 @@ function cleanHTML(html, i, link) {
 		spoilerWrapper1.setAttribute("class", "spoilerContent");
 		spoilerWrapper1.setAttribute("data-class", "spoilerContent");
 		spoilerWrapper1.appendChild(spoilerCopy);
-		
+
 		let spoilerWrapper2 = document.createElement("div");
 		spoilerWrapper2.setAttribute("class", "spoiler");
 		spoilerWrapper2.setAttribute("data-class", "spoiler");
@@ -63,6 +68,8 @@ function cleanHTML(html, i, link) {
 		e.remove();
 	});
 
+	let supportBar = doc.querySelector(".yellow-gold").parentElement.parentElement;
+	supportBar.remove();
 
 	let commentsContainer = doc.querySelector(".comments-container");
 	let numComments = commentsContainer.querySelector(".caption-subject");
@@ -94,11 +101,11 @@ function cleanHTML(html, i, link) {
 }
 
 function splitArray(array, chunkSize) {
-    let result = [];
-    for (let i = 0; i < array.length; i += chunkSize) {
-        result.push(array.slice(i, i + chunkSize));
-    }
-    return result;
+	let result = [];
+	for (let i = 0; i < array.length; i += chunkSize) {
+		result.push(array.slice(i, i + chunkSize));
+	}
+	return result;
 }
 
 function getComments(html, chapTitle) {
@@ -191,9 +198,9 @@ function prepPage() {
 
 	let bod = document.querySelector(".portlet-body");
 	let buttons = bod.querySelector(".nav-buttons");
-	let buttons2 = bod.querySelectorAll(".margin-left-0")[1];
+	let buttons2 = bod.querySelector(".margin-left-0");
 	let chap = bod.querySelector(".chapter-content");
-	let ads = bod.querySelectorAll(".t-center");
+	let notAds = bod.querySelectorAll(".t-center");
 	let notes = bod.querySelectorAll(".author-note-portlet");
 	let comments = document.querySelector(".comment-container").children;
 
@@ -212,7 +219,7 @@ function prepPage() {
 	}
 
 	try {
-		let supportBar = bod.querySelectorAll(".row")[1];
+		let supportBar = bod.querySelector(".yellow-gold").parentElement.parentElement;
 		supportBar.remove();
 	} catch (e) {
 		console.log("mobile");
@@ -228,7 +235,7 @@ function prepPage() {
 	buttons.remove();
 	buttons2.remove();
 	chap.remove();
-	ads.forEach(function(e) {
+	notAds.forEach(function(e) {
 		e.remove();
 	});
 	notes.forEach(function(e) {
@@ -301,14 +308,14 @@ async function insertNewChapter(link, i, isStartingChapter) {
 async function getAllChapterLinks() {
 	// gets the link to the first chapter of the story via the fiction page button and the start reading button
 	const storyUrl = "https://www.royalroad.com" + document.querySelector(".margin-bottom-5").getAttribute("href");
-	
+
 	const response = await fetch(storyUrl);
 	let html = await response.text();
 
 	let parser = new DOMParser();
 	console.log("got homepage");
 	let doc = parser.parseFromString(html, "text/html");
-	
+
 	// grabs from table
 	let links = [];
 	let table = doc.querySelector("#chapters").children[1];
@@ -317,7 +324,7 @@ async function getAllChapterLinks() {
 		row = table.children[i];
 		links.push("https://www.royalroad.com" + row.children[0].children[0].getAttribute("href"));
 	}
-	
+
 	console.log("got chapter links");
 	return links;
 }
@@ -384,11 +391,11 @@ function updatePagination(currentPage, fullComments) {
 	if (currentPage === 0) {
 		const children = fullPagination.querySelectorAll("[data-page]");
 		children.forEach(child => {
-		if (child.getAttribute("data-page") > 5) {
-			child.remove();
-		}
+			if (child.getAttribute("data-page") > 5) {
+				child.remove();
+			}
 		});
-		
+
 		fullPagination.append(nextButton);
 		fullPagination.append(lastButton);
 
@@ -432,7 +439,7 @@ function updatePagination(currentPage, fullComments) {
 	} else {
 		const children = fullPagination.querySelectorAll("[data-page]");
 		children.forEach(child => {
-            // deletes every page NOT between the 2 pages either side of the current page
+			// deletes every page NOT between the 2 pages either side of the current page
 			if (!(currentPage-1 <= child.getAttribute("data-page") && child.getAttribute("data-page") <= currentPage+3)) {
 				child.remove();
 			}
@@ -462,7 +469,7 @@ function loadCommentsPage(splitComments, currentPage) {
 	}
 
 	// adds the new pagination
-    console.log("new page = " + currentPage);
+	console.log("new page = " + currentPage);
 	let wrapper1 = document.createElement("div");
 	wrapper1.setAttribute("class", "text-center");
 
@@ -595,18 +602,13 @@ async function insertAllChapters() {
 		// checks if the first chapter of the story's link and the current link are the same
 		startingChap = chapterLinks[i] === startingLink;
 		let contents = await insertNewChapter(chapterLinks[i], i, startingChap);
+
+		let parent = document.createElement("div");
 		if (startingChap) {
 			// makes the loading animation smaller, and at the top
-			let parent = document.createElement("div");
 			parent.style.display = "flex";
 			parent.style.alignItems = "center";
 			parent.style.justifyContent = "space-between";
-
-			overlay.style.width = "100%";
-			overlay.style.height = "5em";
-			overlay.style.top = "3%";
-			overlay.style.left = "0%";
-			overlay.style.alignSelf = "center";
 
 			loadingText.style.top = "4%";
 			loadingText.style.color = "white";
@@ -615,13 +617,22 @@ async function insertAllChapters() {
 			loadingText.style.marginInline = "-1em";
 			parent.appendChild(loadingText);
 
+			overlay.style.width = "100%";
+			overlay.style.height = "5em";
+			overlay.style.top = "3%";
+			overlay.style.left = "0%";
+			overlay.style.alignSelf = "center";
+
 			loadingAnimation.style.top = "4%";
-			loadingAnimation.style.marginInline = "5em";
+			loadingAnimation.style.marginInline = "10em";
 
 			parent.appendChild(loadingAnimation);
-			overlay.appendChild(parent);
-			document.body.appendChild(overlay);
 		}
+		loadingText.textContent = `Loading... (${i+1}/${chapterLinks.length})`;
+		parent.appendChild(loadingText);
+		overlay.appendChild(parent);
+		document.body.appendChild(overlay);
+
 		totalComments += contents[0];
 		fullComments = fullComments.concat(contents[1]);
 	}
@@ -630,8 +641,8 @@ async function insertAllChapters() {
 	let commentNum = document.querySelectorAll(".caption-subject");
 	commentNum[commentNum.length - 1].innerHTML = "Comments (" + totalComments + ")";
 
-    let splitComments = splitArray(fullComments, 10);
-    console.log(fullComments.length + " comments for whole story");
+	let splitComments = splitArray(fullComments, 10);
+	console.log(fullComments.length + " comments for whole story");
 
 	loadCommentsPage(splitComments, 0);
 
@@ -640,7 +651,7 @@ async function insertAllChapters() {
 	localStorage.setItem(window.location.href + "fullComments", JSON.stringify(fullComments));
 	let story = document.querySelector(".portlet-body");
 	localStorage.setItem(window.location.href + "story", story);
-	
+
 	// remove the overlay
 	overlay.remove();
 	loadingText.remove();
@@ -649,5 +660,6 @@ async function insertAllChapters() {
 	await scrollHandling();
 }
 
-// TODO: 
-// rewrite overall way of getting chapters - get a full list from the index page and asychronously load them
+// TODO:
+// handle those weird network errors
+// progress bar
