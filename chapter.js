@@ -519,6 +519,18 @@ function clickButton(html) {
 	button.click();
 }
 
+function incrementLoadingBar(elem, stepValue, totalChapters) {
+	let incrementValue = (1 / totalChapters) * 100;
+	if (stepValue >= 100) {
+	  stepValue = 0;
+	}
+  
+	stepValue += incrementValue;
+	elem.style.width = stepValue + "%";
+	elem.innerHTML = Number(stepValue).toFixed(1) + "%";
+	return stepValue;
+}
+  
 console.log("loaded chapter.js");
 window.addEventListener("load", function() {
 	console.log("loaded");
@@ -584,11 +596,37 @@ async function insertAllChapters() {
 
 	loadingAnimation.appendChild(cube1);
 	loadingAnimation.appendChild(cube2);
-	// get the loading animation from the raw js like the load method.
+
+	let loadingBarWrapper = document.createElement("div");
+	loadingBarWrapper.style.width = "25%";
+	loadingBarWrapper.style.top = "60%";
+	loadingBarWrapper.style.left = "30%";
+	loadingBarWrapper.style.display = "block";
+	loadingBarWrapper.style.margin = "auto";
+	loadingBarWrapper.style.position = "fixed";
+
+	let loadingBar = document.createElement("span");
+	loadingBar.style.display = "block";
+	loadingBar.style.height = "5%";
+	loadingBar.style.backgroundColor = "#337ab7";
+	loadingBar.style.position = "fixed";
+	loadingBar.style.overflow = "hidden";
+	loadingBar.style.fontSize = "16px";
+	loadingBar.style.fontFamily = "Open Sans,sans-serif";
+	loadingBar.style.fontWeight = 400;
+	loadingBar.style.textAlign = "center";
+	loadingBar.style.lineHeight = "2em";
+	loadingBar.style.color = "white";
+	loadingBar.style.transition = "all 700ms ease";
+	loadingBar.style.borderRadius = "10px";
+
+	loadingBarWrapper.appendChild(loadingBar);
+
 
 	document.body.appendChild(overlay);
 	document.body.appendChild(loadingText);
 	document.body.appendChild(loadingAnimation);
+	document.body.appendChild(loadingBarWrapper);
 
 	let chapterLinks = await getAllChapterLinks();
 	let startingLink = window.location.href;
@@ -596,6 +634,7 @@ async function insertAllChapters() {
 	// loop through until I hit a 404
 	let startingChap = false;
 	let totalComments = 0;
+	let stepValue = 0;
 	let fullComments = [];
 	// here is where we overhaul
 	for (let i = 0; i < chapterLinks.length; i++) {
@@ -629,6 +668,8 @@ async function insertAllChapters() {
 			parent.appendChild(loadingAnimation);
 		}
 		loadingText.textContent = `Loading... (${i+1}/${chapterLinks.length})`;
+		stepValue = incrementLoadingBar(loadingBar, stepValue, chapterLinks.length);
+
 		parent.appendChild(loadingText);
 		overlay.appendChild(parent);
 		document.body.appendChild(overlay);
