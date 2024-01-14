@@ -9,14 +9,16 @@
   padding: 3px;
 }
 
-#greenBar {
+#bar {
   display: block;
   height: 100%;
   width: 0px;
-  background-color: rgb(43, 194, 83);
+  background-color: #337ab7;
   position: relative;
   overflow: hidden;
-  font-size: 15px;
+  font-size: 16px;
+  font-family: Open Sans,sans-serif;
+  font-weight: 400;
   text-align: center;
   line-height: 2em;
   color: white;
