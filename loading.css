@@ -1,0 +1,25 @@
+.progressbarWrapper {
+  height: 30px;
+  width: 500px;
+  max-width: 80%;
+  display: block;
+  margin: auto;
+  margin-top: 4em;
+  position: relative;
+  padding: 3px;
+}
+
+#greenBar {
+  display: block;
+  height: 100%;
+  width: 0px;
+  background-color: rgb(43, 194, 83);
+  position: relative;
+  overflow: hidden;
+  font-size: 15px;
+  text-align: center;
+  line-height: 2em;
+  color: white;
+  transition: all 700ms ease;
+  border-radius: 10px;
+}
