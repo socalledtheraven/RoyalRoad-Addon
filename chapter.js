@@ -137,7 +137,7 @@ async function processComments(html, chapTitle) {
 		for (const page of commentPages) {
 			nextLink = "https://www.royalroad.com" + page.firstChild.getAttribute("href");
 
-			let response = await fetch(nextLink);
+			let response = await fetchRetry(nextLink);
 			let htm = await response.text();
 
 			nextComments = getComments(htm);
@@ -268,7 +268,7 @@ async function insertNewChapter(link, i, isStartingChapter) {
 	// gets the actual chapter text
 	console.log("getting chapter");
 
-	let response1 = await fetch(link);
+	let response1 = await fetchRetry(link);
 	let html1 = await response1.text();
 
 	let contents = cleanHTML(html1, i, link);
@@ -296,7 +296,7 @@ async function insertNewChapter(link, i, isStartingChapter) {
 
 	let commentsLink = link.split("/");
 	commentsLink = commentsLink[0] + "//" + commentsLink[2] + "/" + commentsLink[3] + "/" + commentsLink[6] + "/" + commentsLink[7] + "/comments";
-	let response2 = await fetch((commentsLink + "/1"));
+	let response2 = await fetchRetry((commentsLink + "/1"));
 	let html2 = await response2.text();
 	let comments = await processComments(html2, title);
 
@@ -309,7 +309,7 @@ async function getAllChapterLinks() {
 	// gets the link to the first chapter of the story via the fiction page button and the start reading button
 	const storyUrl = "https://www.royalroad.com" + document.querySelector(".margin-bottom-5").getAttribute("href");
 
-	const response = await fetch(storyUrl);
+	const response = await fetchRetry(storyUrl);
 	let html = await response.text();
 
 	let parser = new DOMParser();
@@ -503,7 +503,7 @@ async function handleIntersection(entries) {
 }
 
 async function updateChapterProgress(url) {
-	let response = await fetch(url);
+	let response = await fetchRetry(url);
 	let html = await response.text();
 	console.log("loaded");
 	clickButton(html);
@@ -529,6 +529,24 @@ function incrementLoadingBar(elem, stepValue, totalChapters) {
 	elem.style.width = stepValue + "%";
 	elem.innerHTML = Number(stepValue).toFixed(1) + "%";
 	return stepValue;
+}
+
+async function wait(delay){
+	return new Promise((resolve) => setTimeout(resolve, delay));
+}
+
+async function fetchRetry(url) {
+	let tries = 5;
+	let delay = 1000;
+	function onError(err){
+		let triesLeft = tries - 1;
+		delay *= (5-triesLeft)
+		if(!triesLeft){
+			throw err;
+		}
+		return wait(delay).then(() => fetchRetry(url, delay, triesLeft));
+	}
+	return fetch(url).catch(onError);
 }
 
 console.log("loaded chapter.js");
