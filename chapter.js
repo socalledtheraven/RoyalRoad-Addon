@@ -536,10 +536,11 @@ async function wait(delay){
 }
 
 async function fetchRetry(url) {
-	let tries = 5;
-	let delay = 1000;
+	let tries = 10;
+	let delay = 500;
 	function onError(err){
 		let triesLeft = tries - 1;
+		console.log(`failed, ${triesLeft} tries left`)
 		delay *= (5-triesLeft)
 		if(!triesLeft){
 			throw err;
@@ -721,6 +722,3 @@ async function insertAllChapters() {
 
 	await scrollHandling();
 }
-
-// TODO:
-// handle those weird network errors
