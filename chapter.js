@@ -522,15 +522,15 @@ function clickButton(html) {
 function incrementLoadingBar(elem, stepValue, totalChapters) {
 	let incrementValue = (1 / totalChapters) * 100;
 	if (stepValue >= 100) {
-	  stepValue = 0;
+		stepValue = 0;
 	}
-  
+
 	stepValue += incrementValue;
 	elem.style.width = stepValue + "%";
 	elem.innerHTML = Number(stepValue).toFixed(1) + "%";
 	return stepValue;
 }
-  
+
 console.log("loaded chapter.js");
 window.addEventListener("load", function() {
 	console.log("loaded");
@@ -597,36 +597,37 @@ async function insertAllChapters() {
 	loadingAnimation.appendChild(cube1);
 	loadingAnimation.appendChild(cube2);
 
-	let loadingBarWrapper = document.createElement("div");
-	loadingBarWrapper.style.width = "25%";
-	loadingBarWrapper.style.top = "60%";
-	loadingBarWrapper.style.left = "30%";
-	loadingBarWrapper.style.display = "block";
-	loadingBarWrapper.style.margin = "auto";
-	loadingBarWrapper.style.position = "fixed";
+	// let loadingBarWrapper = document.createElement("div");
+	// loadingBarWrapper.style.width = "25%";
+	// loadingBarWrapper.style.top = "60%";
+	// loadingBarWrapper.style.left = "30%";
+	// loadingBarWrapper.style.display = "block";
+	// loadingBarWrapper.style.margin = "auto";
+	// loadingBarWrapper.style.position = "fixed";
 
 	let loadingBar = document.createElement("span");
 	loadingBar.style.display = "block";
-	loadingBar.style.height = "5%";
+	loadingBar.style.top = "0";
+	loadingBar.style.height = "3%";
 	loadingBar.style.backgroundColor = "#337ab7";
 	loadingBar.style.position = "fixed";
 	loadingBar.style.overflow = "hidden";
 	loadingBar.style.fontSize = "16px";
 	loadingBar.style.fontFamily = "Open Sans,sans-serif";
-	loadingBar.style.fontWeight = 400;
+	loadingBar.style.fontWeight = "400";
 	loadingBar.style.textAlign = "center";
-	loadingBar.style.lineHeight = "2em";
+	loadingBar.style.lineHeight = "1.5em";
 	loadingBar.style.color = "white";
 	loadingBar.style.transition = "all 700ms ease";
 	loadingBar.style.borderRadius = "10px";
 
-	loadingBarWrapper.appendChild(loadingBar);
+	// loadingBarWrapper.appendChild(loadingBar);
 
 
+	overlay.appendChild(loadingText);
+	overlay.appendChild(loadingAnimation);
+	overlay.appendChild(loadingBar);
 	document.body.appendChild(overlay);
-	document.body.appendChild(loadingText);
-	document.body.appendChild(loadingAnimation);
-	document.body.appendChild(loadingBarWrapper);
 
 	let chapterLinks = await getAllChapterLinks();
 	let startingLink = window.location.href;
@@ -654,7 +655,7 @@ async function insertAllChapters() {
 			loadingText.style.fontSize = "36px";
 			loadingText.style.textAlign = "center";
 			loadingText.style.marginInline = "-1em";
-			parent.appendChild(loadingText);
+			// parent.appendChild(loadingText);
 
 			overlay.style.width = "100%";
 			overlay.style.height = "5em";
@@ -665,14 +666,15 @@ async function insertAllChapters() {
 			loadingAnimation.style.top = "4%";
 			loadingAnimation.style.marginInline = "10em";
 
-			parent.appendChild(loadingAnimation);
+			// parent.appendChild(loadingAnimation);
 		}
 		loadingText.textContent = `Loading... (${i+1}/${chapterLinks.length})`;
 		stepValue = incrementLoadingBar(loadingBar, stepValue, chapterLinks.length);
 
-		parent.appendChild(loadingText);
-		overlay.appendChild(parent);
-		document.body.appendChild(overlay);
+		// console.log(parent.children)
+		// parent.appendChild(loadingText);
+		// overlay.appendChild(parent);
+		// document.body.appendChild(overlay);
 
 		totalComments += contents[0];
 		fullComments = fullComments.concat(contents[1]);
@@ -697,10 +699,10 @@ async function insertAllChapters() {
 	overlay.remove();
 	loadingText.remove();
 	loadingAnimation.remove();
+	loadingBar.remove();
 
 	await scrollHandling();
 }
 
 // TODO:
 // handle those weird network errors
-// progress bar
