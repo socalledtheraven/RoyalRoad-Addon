@@ -41,12 +41,20 @@ function cleanHTML(html, i, link) {
 		spoilerCopy.setAttribute("class", "spoiler-inner");
 		spoilerCopy.setAttribute("data-class", "spoiler-inner");
 		spoilerCopy.setAttribute("style", "display: none;");
-		spoilerCopy.innerHTML = spoiler.innerHTML;
+		spoilerCopy.textContent = spoiler.textContent;
+
+		let spoilerButton = document.createElement("input");
+		spoilerButton.setAttribute("class", "spoilerButton btn btn-default btn-xs")
+		spoilerButton.setAttribute("type", "button")
+		spoilerButton.setAttribute("value", "Show")
+		spoilerButton.setAttribute("data-class", "spoilerButton")
 
 		let spoilerDisplay = document.createElement("div");
 		spoilerDisplay.setAttribute("class", "smalltext");
 		spoilerDisplay.setAttribute("style", "margin-bottom: 2px;");
-		spoilerDisplay.innerHTML = '<strong>Spoiler</strong> <input class="spoilerButton btn btn-default btn-xs" type="button" value="Show" data-class="spoilerButton">'
+		spoilerDisplay.style.fontWeight = 'bold';
+		spoilerDisplay.textContent = "Spoiler"
+		spoilerDisplay.appendChild(spoilerButton)
 
 		let spoilerWrapper1 = document.createElement("div");
 		spoilerWrapper1.setAttribute("class", "spoilerContent");
@@ -77,26 +85,71 @@ function cleanHTML(html, i, link) {
 
 	// combine the notes and the chapter text
 	// if the chapter is the first one, don't add a horizontal rule
-	let chapter = "";
+	let chapter = document.createElement("div");
 	let poll = doc.querySelector(".portlet .light");
+
+	let titleLink = document.createElement("a");
+	titleLink.setAttribute("id", "chapter-title")
+	titleLink.setAttribute("href", link)
+	titleLink.textContent = title;
+
+	let titleElement = document.createElement("h2");
+	titleElement.setAttribute("class", "font-black")
+	titleElement.appendChild(titleLink);
+
+	let endOfChapLink = document.createElement("a");
+	titleLink.setAttribute("id", "chapter-title")
+	titleLink.setAttribute("href", link)
 
 	// only add the existing notes
 	if ((note1 != null) && (note2 != null) && (poll != null)) {
-		chapter += `<h2 class="font-black"><a id="chapter-title" href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML + note2.outerHTML + poll.outerHTML + `<a id='chapter-title' href="${link}"></a>` + `<hr>`;
+		chapter.appendChild(titleElement);
+		chapter.appendChild(document.createElement("hr"));
+		chapter.appendChild(note1);
+		chapter.appendChild(chapterText);
+		chapter.appendChild(note2);
+		chapter.appendChild(poll);
+		chapter.appendChild(endOfChapLink);
+		chapter.appendChild(document.createElement("hr"));
+	} else if ((note1 != null) && (note2 != null)) {
+		chapter.appendChild(titleElement);
+		chapter.appendChild(document.createElement("hr"));
+		chapter.appendChild(note1);
+		chapter.appendChild(chapterText);
+		chapter.appendChild(note2);
+		chapter.appendChild(endOfChapLink);
+		chapter.appendChild(document.createElement("hr"));
 	} else if (note1 != null) {
-		chapter += `<h2 class="font-black"><a id="chapter-title" href="${link}">${title}</a></h2><hr>` + note1.outerHTML + chapterText.outerHTML + `<a id='chapter-title' href="${link}"></a>` + `<hr>`;
+		chapter.appendChild(titleElement);
+		chapter.appendChild(document.createElement("hr"));
+		chapter.appendChild(note1);
+		chapter.appendChild(chapterText);
+		chapter.appendChild(endOfChapLink);
+		chapter.appendChild(document.createElement("hr"));
 	} else if (note2 != null) {
-		chapter += `<h2 class="font-black"><a id="chapter-title" href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + note2.outerHTML + `<a id='chapter-title' href="${link}"></a>` + `<hr>`;
+		chapter.appendChild(titleElement);
+		chapter.appendChild(document.createElement("hr"));
+		chapter.appendChild(chapterText);
+		chapter.appendChild(note2);
+		chapter.appendChild(endOfChapLink);
+		chapter.appendChild(document.createElement("hr"));
 	} else if (poll != null) {
-		chapter += `<h2 class="font-black"><a id="chapter-title" href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + poll.outerHTML + `<a id='chapter-title' href="${link}"></a>` + `<hr>`;
+		chapter.appendChild(titleElement);
+		chapter.appendChild(document.createElement("hr"));
+		chapter.appendChild(chapterText);
+		chapter.appendChild(poll);
+		chapter.appendChild(endOfChapLink);
+		chapter.appendChild(document.createElement("hr"));
 	} else {
-		chapter += `<h2 class="font-black"><a id="chapter-title" href="${link}">${title}</a></h2><hr>` + chapterText.outerHTML + `<a id='chapter-title' href="${link}"></a>` + `<hr>`;
+		chapter.appendChild(titleElement);
+		chapter.appendChild(document.createElement("hr"));
+		chapter.appendChild(chapterText);
+		chapter.appendChild(endOfChapLink);
+		chapter.appendChild(document.createElement("hr"));
 	}
 
 	// turns the html into elements
-	let temp = document.createElement("div");
-	temp.innerHTML = chapter;
-	let chapterContents = Array.from(temp.children);
+	let chapterContents = Array.from(chapter.children);
 	return [chapterContents, numComments, title];
 }
 
@@ -114,7 +167,7 @@ function getComments(html, chapTitle) {
 	let bod = doc.querySelector("body");
 
 	for (const text of bod.querySelectorAll("small")) {
-		text.innerHTML = chapTitle + " - " + text.innerHTML;
+		text.textContent = chapTitle + " - " + text.textContent;
 	}
 	// get only the elements with the class "comment"
 	return Array.prototype.slice.call(Array.from(bod.childNodes).filter((element) => {
@@ -173,7 +226,7 @@ function fixButtons() {
 	// add the new button
 	let newButton = document.createElement("a");
 	newButton.setAttribute("class", "btn btn-primary col-xs-4");
-	newButton.innerHTML = 'Full <br class="visible-xs-block">Text';
+	newButton.textContent = 'Full <br class="visible-xs-block">Text';
 	newButton.setAttribute("id", "runFunction");
 
 	// uses the same formatting as the bottom page buttons
@@ -527,7 +580,7 @@ function incrementLoadingBar(elem, stepValue, totalChapters) {
 
 	stepValue += incrementValue;
 	elem.style.width = stepValue + "%";
-	elem.innerHTML = Number(stepValue).toFixed(1) + "%";
+	elem.textContent = Number(stepValue).toFixed(1) + "%";
 	return stepValue;
 }
 
@@ -701,7 +754,7 @@ async function insertAllChapters() {
 
 	// change the comment number - it's inconsistent with the length of the array bc subcomments are counted
 	let commentNum = document.querySelectorAll(".caption-subject");
-	commentNum[commentNum.length - 1].innerHTML = "Comments (" + totalComments + ")";
+	commentNum[commentNum.length - 1].textContent = `Comments (${totalComments})`;
 
 	let splitComments = splitArray(fullComments, 10);
 	console.log(fullComments.length + " comments for whole story");
