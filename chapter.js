@@ -223,10 +223,15 @@ function fixButtons() {
 		link.setAttribute("class", link.className + " col-xs-4");
 	}
 
+	let buttonBr = document.createElement("br");
+	buttonBr.setAttribute("class", "visible-xs-block")
+
 	// add the new button
 	let newButton = document.createElement("a");
 	newButton.setAttribute("class", "btn btn-primary col-xs-4");
-	newButton.textContent = 'Full <br class="visible-xs-block">Text';
+	newButton.textContent = "Full ";
+	newButton.appendChild(buttonBr);
+	newButton.append("Text");
 	newButton.setAttribute("id", "runFunction");
 
 	// uses the same formatting as the bottom page buttons
