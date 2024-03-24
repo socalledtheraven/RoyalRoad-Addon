@@ -380,7 +380,7 @@ async function getAllChapterLinks() {
 	let row;
 	for (let i = 0; i < table.children.length; i++) {
 		row = table.children[i];
-		links.push("https://www.royalroad.com" + row.children[0].children[0].getAttribute("href"));
+		links.push("https://www.royalroad.com" + row.querySelector("td").querySelector("a").getAttribute("href"));
 	}
 
 	console.log("got chapter links");
@@ -758,7 +758,6 @@ async function insertAllChapters() {
 
       totalComments += contents[0];
       fullComments = fullComments.concat(contents[1]);
-      await delayMain(500);
     }
   } catch(err) {
     console.log(err)
