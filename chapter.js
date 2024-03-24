@@ -190,7 +190,7 @@ async function processComments(html, chapTitle) {
 		for (const page of commentPages) {
 			nextLink = "https://www.royalroad.com" + page.firstChild.getAttribute("href");
 
-			let response = await fetchRetry(nextLink);
+			let response = await fetchRetry(nextLink, 500, 10);
 			let htm = await response.text();
 
 			nextComments = getComments(htm);
@@ -326,7 +326,7 @@ async function insertNewChapter(link, i, isStartingChapter) {
 	// gets the actual chapter text
 	console.log("getting chapter");
 
-	let response1 = await fetchRetry(link);
+	let response1 = await fetchRetry(link, 500, 10);
 	let html1 = await response1.text();
 
 	let contents = cleanHTML(html1, i, link);
@@ -354,7 +354,7 @@ async function insertNewChapter(link, i, isStartingChapter) {
 
 	let commentsLink = link.split("/");
 	commentsLink = commentsLink[0] + "//" + commentsLink[2] + "/" + commentsLink[3] + "/" + commentsLink[6] + "/" + commentsLink[7] + "/comments";
-	let response2 = await fetchRetry((commentsLink + "/1"));
+	let response2 = await fetchRetry((commentsLink + "/1"), 500, 10);
 	let html2 = await response2.text();
 	let comments = await processComments(html2, title);
 
@@ -367,7 +367,7 @@ async function getAllChapterLinks() {
 	// gets the link to the first chapter of the story via the fiction page button and the start reading button
 	const storyUrl = "https://www.royalroad.com" + document.querySelector(".margin-bottom-5").getAttribute("href");
 
-	const response = await fetchRetry(storyUrl);
+	const response = await fetchRetry(storyUrl, 500, 10);
 	let html = await response.text();
 
 	let parser = new DOMParser();
@@ -561,7 +561,7 @@ async function handleIntersection(entries) {
 }
 
 async function updateChapterProgress(url) {
-	let response = await fetchRetry(url);
+	let response = await fetchRetry(url, 500, 10);
 	let html = await response.text();
 	console.log("loaded");
 	clickButton(html);
@@ -593,19 +593,21 @@ async function wait(delay){
 	return new Promise((resolve) => setTimeout(resolve, delay));
 }
 
-async function fetchRetry(url) {
-	let tries = 10;
-	let delay = 500;
+async function fetchRetry(url, delay, tries) {
 	function onError(err){
 		let triesLeft = tries - 1;
 		console.log(`failed, ${triesLeft} tries left`)
-		delay *= (5-triesLeft)
-		if(!triesLeft){
+		delay *= (10-triesLeft)
+		if(triesLeft == 0){
 			throw err;
 		}
 		return wait(delay).then(() => fetchRetry(url, delay, triesLeft));
 	}
 	return fetch(url).catch(onError);
+}
+
+function delayMain(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 console.log("loaded chapter.js");
@@ -715,68 +717,74 @@ async function insertAllChapters() {
 	let stepValue = 0;
 	let fullComments = [];
 	// here is where we overhaul
-	for (let i = 0; i < chapterLinks.length; i++) {
-		// checks if the first chapter of the story's link and the current link are the same
-		startingChap = chapterLinks[i] === startingLink;
-		let contents = await insertNewChapter(chapterLinks[i], i, startingChap);
+  try {
+    for (let i = 0; i < chapterLinks.length; i++) {
+      // checks if the first chapter of the story's link and the current link are the same
+      startingChap = chapterLinks[i] === startingLink;
+      let contents = await insertNewChapter(chapterLinks[i], i, startingChap);
 
-		let parent = document.createElement("div");
-		if (startingChap) {
-			// makes the loading animation smaller, and at the top
-			parent.style.display = "flex";
-			parent.style.alignItems = "center";
-			parent.style.justifyContent = "space-between";
+      let parent = document.createElement("div");
+      if (startingChap) {
+        // makes the loading animation smaller, and at the top
+        parent.style.display = "flex";
+        parent.style.alignItems = "center";
+        parent.style.justifyContent = "space-between";
 
-			loadingText.style.top = "4%";
-			loadingText.style.color = "white";
-			loadingText.style.fontSize = "36px";
-			loadingText.style.textAlign = "center";
-			loadingText.style.marginInline = "-1em";
-			// parent.appendChild(loadingText);
+        loadingText.style.top = "4%";
+        loadingText.style.color = "white";
+        loadingText.style.fontSize = "36px";
+        loadingText.style.textAlign = "center";
+        loadingText.style.marginInline = "-1em";
+        // parent.appendChild(loadingText);
 
-			overlay.style.width = "100%";
-			overlay.style.height = "5em";
-			overlay.style.top = "3%";
-			overlay.style.left = "0%";
-			overlay.style.alignSelf = "center";
+        overlay.style.width = "100%";
+        overlay.style.height = "5em";
+        overlay.style.top = "3%";
+        overlay.style.left = "0%";
+        overlay.style.alignSelf = "center";
 
-			loadingAnimation.style.top = "4%";
-			loadingAnimation.style.marginInline = "10em";
+        loadingAnimation.style.top = "4%";
+        loadingAnimation.style.marginInline = "10em";
 
-			// parent.appendChild(loadingAnimation);
-		}
-		loadingText.textContent = `Loading... (${i+1}/${chapterLinks.length})`;
-		stepValue = incrementLoadingBar(loadingBar, stepValue, chapterLinks.length);
+        // parent.appendChild(loadingAnimation);
+      }
+      loadingText.textContent = `Loading... (${i+1}/${chapterLinks.length})`;
+      stepValue = incrementLoadingBar(loadingBar, stepValue, chapterLinks.length);
 
-		// console.log(parent.children)
-		// parent.appendChild(loadingText);
-		// overlay.appendChild(parent);
-		// document.body.appendChild(overlay);
+      // console.log(parent.children)
+      // parent.appendChild(loadingText);
+      // overlay.appendChild(parent);
+      // document.body.appendChild(overlay);
 
-		totalComments += contents[0];
-		fullComments = fullComments.concat(contents[1]);
-	}
+      totalComments += contents[0];
+      fullComments = fullComments.concat(contents[1]);
+      await delayMain(500);
+    }
+  } catch(err) {
+    console.log(err)
+  } finally {
 
-	// change the comment number - it's inconsistent with the length of the array bc subcomments are counted
-	let commentNum = document.querySelectorAll(".caption-subject");
-	commentNum[commentNum.length - 1].textContent = `Comments (${totalComments})`;
+    // change the comment number - it's inconsistent with the length of the array bc subcomments are counted
+    let commentNum = document.querySelectorAll(".caption-subject");
+    commentNum[commentNum.length - 1].textContent = `Comments (${totalComments})`;
 
-	let splitComments = splitArray(fullComments, 10);
-	console.log(fullComments.length + " comments for whole story");
+    let splitComments = splitArray(fullComments, 10);
+    console.log(fullComments.length + " comments for whole story");
 
-	loadCommentsPage(splitComments, 0);
+    loadCommentsPage(splitComments, 0);
 
-	console.log("end of story");
+    console.log("end of story");
 
-	localStorage.setItem(window.location.href + "fullComments", JSON.stringify(fullComments));
-	let story = document.querySelector(".portlet-body");
-	localStorage.setItem(window.location.href + "story", story);
+    localStorage.setItem(window.location.href + "fullComments", JSON.stringify(fullComments));
+    let story = document.querySelector(".portlet-body");
+    localStorage.setItem(window.location.href + "story", story);
 
-	// remove the overlay
-	overlay.remove();
-	loadingText.remove();
-	loadingAnimation.remove();
-	loadingBar.remove();
+    // remove the overlay
+    overlay.remove();
+    loadingText.remove();
+    loadingAnimation.remove();
+    loadingBar.remove();
 
-	await scrollHandling();
+    await scrollHandling();
+  }
 }
