@@ -319,7 +319,7 @@ function prepPage() {
 	console.log("removed initial elements");
 }
 
-async function insertNewChapter(link, i, isStartingChapter) {
+async function insertNewChapter(link, i, isStartingChapter, insertAfter) {
 	let body = document.querySelector(".portlet-body");
 	let hr = body.querySelectorAll("hr");
 
@@ -337,12 +337,26 @@ async function insertNewChapter(link, i, isStartingChapter) {
 	let title = contents[2];
 
 	// inserts the chapter (you have to do some bs to avoid the removal from the array)
-	let lastHr = hr[hr.length - 1];
-	let l = chapterContents.length;
+	if (insertAfter) {
+		let lastHr = hr[hr.length - 1];
+		if (isStartingChapter) {
+			hr[hr.length - 2].setAttribute("id", "important")
+		}
 
-	for (let i = 0; i < l; i++) {
-		let elem = chapterContents[i];
-		lastHr.insertAdjacentElement("beforebegin", elem);
+		let l = chapterContents.length;
+
+		for (let j = 0; j < l; j++) {
+			let elem = chapterContents[j];
+			lastHr.insertAdjacentElement("beforebegin", elem);
+		}
+	} else {
+		let firstHr = body.querySelector("hr#important");
+		let l = chapterContents.length;
+
+		for (let j = 0; j < l; j++) {
+			let elem = chapterContents[j];
+			firstHr.insertAdjacentElement("beforebegin", elem);
+		}
 	}
 
 	// automatically scrolls to correct chapter
@@ -363,7 +377,7 @@ async function insertNewChapter(link, i, isStartingChapter) {
 	return [numComments, comments];
 }
 
-async function getAllChapterLinks() {
+async function getAllChapterLinks(currentChapLink) {
 	// gets the link to the first chapter of the story via the fiction page button and the start reading button
 	const storyUrl = "https://www.royalroad.com" + document.querySelector(".margin-bottom-5").getAttribute("href");
 
@@ -378,13 +392,23 @@ async function getAllChapterLinks() {
 	let links = [];
 	let table = doc.querySelector("#chapters").children[1];
 	let row;
+	let localLink;
 	for (let i = 0; i < table.children.length; i++) {
 		row = table.children[i];
-		links.push("https://www.royalroad.com" + row.querySelector("td").querySelector("a").getAttribute("href"));
+		localLink = row.querySelector("td").querySelector("a").getAttribute("href");
+		links.push("https://www.royalroad.com" + localLink);
 	}
 
+	let currentChapterNum = links.indexOf(currentChapLink);
+
+	let afterCurrentChap = links.splice(currentChapterNum, links.length-1);
+	let order1 = new Array(afterCurrentChap.length).fill(true);
+	let order2 = new Array(links.length).fill(false);
+	links = [...afterCurrentChap, ...links];
+	let order = [...order1, ...order2];
+
 	console.log("got chapter links");
-	return links;
+	return [links, order];
 }
 
 function fullPaginationGen(fullComments) {
@@ -693,8 +717,10 @@ async function insertAllChapters() {
 	overlay.appendChild(loadingBar);
 	document.body.appendChild(overlay);
 
-	let chapterLinks = await getAllChapterLinks();
 	let startingLink = window.location.href;
+	let contents = await getAllChapterLinks(startingLink);
+	let chapterLinks = contents[0];
+	let ordering = contents[1];
 
 	// loop through until I hit a 404
 	let startingChap = false;
@@ -705,8 +731,8 @@ async function insertAllChapters() {
 	try {
 		for (let i = 0; i < chapterLinks.length; i++) {
 			// checks if the first chapter of the story's link and the current link are the same
-			startingChap = chapterLinks[i] === startingLink;
-			let contents = await insertNewChapter(chapterLinks[i], i, startingChap);
+			startingChap = i === 0;
+			let contents = await insertNewChapter(chapterLinks[i], i, startingChap, ordering[i]);
 
 			let parent = document.createElement("div");
 			if (startingChap) {
