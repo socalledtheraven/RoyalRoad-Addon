@@ -400,12 +400,14 @@ async function getAllChapterLinks(currentChapLink) {
 	}
 
 	let currentChapterNum = links.indexOf(currentChapLink);
-
-	let afterCurrentChap = links.splice(currentChapterNum, links.length-1);
-	let order1 = new Array(afterCurrentChap.length).fill(true);
-	let order2 = new Array(links.length).fill(false);
-	links = [...afterCurrentChap, ...links];
-	let order = [...order1, ...order2];
+	// should get all the links in that section and replace them with a boolean
+	let first_order_segment = links.slice(0, currentChapterNum).map(() => false);
+	let second_order_segment = links.slice(currentChapterNum + 1).map(() => true);
+	/* i hate everything. the bug here was that there was an off-by-one error in the number of values in this list.
+	when we get to the part where I try to access a non-existent list index, does javascript stop me? of course not!
+	instead, it interprets a non-existent value as falsy and goes down the other if branch! what the fuck, javascript! */
+	second_order_segment.push(true);
+	let order = [...first_order_segment, ...second_order_segment];
 
 	console.log("got chapter links");
 	return [links, order];
@@ -643,19 +645,19 @@ window.addEventListener("load", function() {
 });
 
 window.addEventListener("beforeunload", function() {
-	localStorage.setItem("previousScrollY", window.scrollY);
+	localStorage.setItem("previousScrollY", window.scrollY.toString());
 });
 
 fixButtons();
 
 document.getElementById("runFunction").addEventListener("click", function() {
-	insertAllChapters();
+	insertAllChapters().then(function(){});
 }, false);
 
 
 // this function needs to be below for reasons of attaching the event listener
 async function insertAllChapters() {
-	localStorage.setItem(window.location.href + "fullTextLoaded", true);
+	localStorage.setItem(window.location.href + "fullTextLoaded", "true");
 	// removes all the normal chapter content
 	prepPage();
 
@@ -777,7 +779,7 @@ async function insertAllChapters() {
 
 		localStorage.setItem(window.location.href + "fullComments", JSON.stringify(fullComments));
 		let story = document.querySelector(".portlet-body");
-		localStorage.setItem(window.location.href + "story", story);
+		localStorage.setItem(window.location.href + "story", story.toString());
 
 		// remove the overlay
 		overlay.remove();
