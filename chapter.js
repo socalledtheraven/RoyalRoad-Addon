@@ -336,12 +336,13 @@ async function insertNewChapter(link, i, isStartingChapter, insertAfter) {
 	let numComments = contents[1];
 	let title = contents[2];
 
+	if (isStartingChapter) {
+		hr[hr.length - 2].setAttribute("id", "important")
+	}
+
 	// inserts the chapter (you have to do some bs to avoid the removal from the array)
 	if (insertAfter) {
 		let lastHr = hr[hr.length - 1];
-		if (isStartingChapter) {
-			hr[hr.length - 2].setAttribute("id", "important")
-		}
 
 		let l = chapterContents.length;
 
@@ -350,6 +351,7 @@ async function insertNewChapter(link, i, isStartingChapter, insertAfter) {
 			lastHr.insertAdjacentElement("beforebegin", elem);
 		}
 	} else {
+		// we don't just get the first hr because then we overwrite other chapters as they're added
 		let firstHr = body.querySelector("hr#important");
 		let l = chapterContents.length;
 
