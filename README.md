@@ -10,7 +10,7 @@ If you like this addon, please review it!
 - Works from any chapter, loading that first, then the chapters after it, then the ones before, to allow you to jump right into the story!
 - Works on Firefox and Firefox for Android!
 
-> ![Note]
+> [!Note]
 > Posting comments currently doesn't work properly in the full view.
 
 ## Installation
