@@ -13,7 +13,7 @@ function cleanHTML(html, i, link) {
 	let note2;
 	let note = doc.querySelector(".author-note-portlet");
 	//remove anti-scrapping warnings on the text
-	doc.querySelectorAll('.chapter-inner.chapter-content span').forEach(s => s.remove());
+	doc.querySelectorAll('.chapter-inner.chapter-content > span').forEach(s => s.remove());
 	if (doc.querySelectorAll(".author-note-portlet").length > 1) {
 		console.log("more than one note");
 		note1 = doc.querySelectorAll(".author-note-portlet")[0];
