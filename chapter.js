@@ -343,7 +343,7 @@ async function insertNewChapter(link, i, isStartingChapter, insertAfter) {
 	let title = contents[2];
 
 	if (isStartingChapter) {
-		hr[hr.length - 2].setAttribute("id", "important")
+		hr[hr.length - 1].setAttribute("id", "important")
 	}
 
 	// inserts the chapter (you have to do some bs to avoid the removal from the array)
