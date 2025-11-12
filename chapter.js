@@ -14,7 +14,7 @@ function cleanHTML(html, i, link) {
 	let note = doc.querySelector(".author-note-portlet");
 
 	// remove anti-scraping warnings on the text
-	let warnings = doc.querySelectorAll('.chapter-inner.chapter-content span');
+	let warnings = doc.querySelectorAll('.chapter-inner.chapter-content > span');
 	for (let span of warnings) {
 		span.remove();
 	}
