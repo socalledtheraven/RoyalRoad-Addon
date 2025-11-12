@@ -18,7 +18,7 @@ function cleanHTML(html, i, link) {
 	for (let span of warnings) {
 		span.remove();
 	}
-
+  
 	if (doc.querySelectorAll(".author-note-portlet").length > 1) {
 		console.log("more than one note");
 		note1 = doc.querySelectorAll(".author-note-portlet")[0];
