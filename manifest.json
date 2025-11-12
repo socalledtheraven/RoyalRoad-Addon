@@ -2,7 +2,7 @@
   "description": "An addon that adds an option for reading the full text of a RoyalRoad story.",
   "manifest_version": 2,
   "name": "RoyalRoad Full Story",
-  "version": "5.1.2",
+  "version": "5.1.3",
   "homepage_url": "https://github.com/QuintBrit/RoyalRoad-Addon",
   "icons": {
     "16": "icons/favicon-16x16.png",
@@ -17,5 +17,10 @@
   ],
   "permissions": [
     "webRequest"
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{375f35c9-3e06-4aab-8512-44e2f6c42b54}"
+    }
+  }
 }
